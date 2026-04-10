@@ -1,0 +1,12 @@
+{
+  "name": "BadHexBot",
+  "personality": {
+    "tone": "calm",
+    "formality": "formal",
+    "humor": "none"
+  },
+  "theme": {
+    "primary_color": "red",
+    "accent_color": "#004E89"
+  }
+}

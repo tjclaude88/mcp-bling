@@ -96,6 +96,13 @@ export async function loadIdentity(filePath: string): Promise<LoadResult> {
         error: `bling.json is missing required field: theme.${field}. Required fields are: name, personality (tone, formality, humor), theme (primary_color, accent_color).`,
       };
     }
+    // Validate hex colour format (e.g. "#FF6B35" — # followed by 6 hex digits)
+    if (!/^#[0-9A-Fa-f]{6}$/.test(theme[field] as string)) {
+      return {
+        ok: false,
+        error: `bling.json theme.${field} must be a hex colour like #FF6B35. Got: "${theme[field]}".`,
+      };
+    }
   }
 
   // All required fields present — return the identity

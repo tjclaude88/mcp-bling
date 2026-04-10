@@ -62,6 +62,15 @@ describe("loadIdentity", () => {
     }
   });
 
+  it("returns an error when theme colours are not valid hex", async () => {
+    const result = await loadIdentity(fixture("bad-hex.json"));
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain("must be a hex colour");
+    }
+  });
+
   it("preserves optional fields when present", async () => {
     const result = await loadIdentity(fixture("full.json"));
 
