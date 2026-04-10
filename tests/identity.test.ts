@@ -50,15 +50,27 @@ describe("loadIdentity", () => {
     }
   });
 
-  it("preserves optional fields when present", async () => {
+  it("leaves optional fields undefined when absent", async () => {
     const result = await loadIdentity(fixture("valid.json"));
 
-    // valid.json has no optional fields — they should be undefined
+    // valid.json only has required fields — optional ones should be undefined
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.identity.avatar_url).toBeUndefined();
       expect(result.identity.quirks).toBeUndefined();
       expect(result.identity.physical).toBeUndefined();
+    }
+  });
+
+  it("preserves optional fields when present", async () => {
+    const result = await loadIdentity(fixture("full.json"));
+
+    // full.json has all optional fields — they should come through
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.identity.avatar_url).toBe("https://example.com/fullbot.png");
+      expect(result.identity.quirks?.nervous_habit).toBe("clears throat repeatedly");
+      expect(result.identity.physical?.species).toBe("cat");
     }
   });
 });
