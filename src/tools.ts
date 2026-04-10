@@ -3,6 +3,9 @@
 // Theme helpers are exported so tests can call them directly.
 
 import type { BlingIdentity } from "./types.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import { loadIdentity } from "./identity.js";
 
 /**
  * Convert a hex colour string (e.g. "#FF6B35") to a 24-bit ANSI
@@ -86,4 +89,60 @@ export function generateThemeForPlatform(
         message: "Unknown platform. Here are the raw theme colours.",
       };
   }
+}
+
+/**
+ * Register the Bling Bag MCP tools on a server instance.
+ *
+ * @param server - The MCP server to register tools on
+ * @param blingPath - Path to the bling.json file to read
+ */
+export function registerTools(server: McpServer, blingPath: string): void {
+  // Tool 1: get_identity
+  // Returns the bot's full identity from bling.json
+  server.tool(
+    "get_identity",
+    "Get the bot's full identity — name, personality, quirks, appearance, and theme colours",
+    {},
+    async () => {
+      const result = await loadIdentity(blingPath);
+
+      if (!result.ok) {
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify({ error: result.error }) }],
+        };
+      }
+
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(result.identity, null, 2) }],
+      };
+    },
+  );
+
+  // Tool 2: get_theme_for_platform
+  // Returns styling tailored to a specific platform
+  server.tool(
+    "get_theme_for_platform",
+    "Get platform-specific styling for the bot (terminal, web, slack, discord, or ide)",
+    {
+      platform: z
+        .string()
+        .describe("Target platform: terminal, web, slack, discord, or ide"),
+    },
+    async ({ platform }) => {
+      const result = await loadIdentity(blingPath);
+
+      if (!result.ok) {
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify({ error: result.error }) }],
+        };
+      }
+
+      const theme = generateThemeForPlatform(result.identity, platform);
+
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(theme, null, 2) }],
+      };
+    },
+  );
 }
