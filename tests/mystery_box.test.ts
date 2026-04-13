@@ -417,4 +417,21 @@ describe("NAMED_SUBJECTS", () => {
       expect(NAMED_SUBJECTS).toContain(ns);
     }
   });
+
+  it("paragraphs are substantive (not stub strings)", () => {
+    for (const ns of NAMED_SUBJECTS) {
+      expect(ns.paragraph.length).toBeGreaterThan(50);
+    }
+  });
+
+  it("lore citations follow the 'Source, Year.' format", () => {
+    for (const ns of NAMED_SUBJECTS) {
+      expect(ns.lore).toMatch(/, \d{4}\.$/);
+    }
+  });
+
+  it("subject_ids are unique across the 5 subjects", () => {
+    const ids = NAMED_SUBJECTS.map((n) => n.identity.homunculus.subject_id);
+    expect(new Set(ids).size).toBe(5);
+  });
 });

@@ -503,12 +503,12 @@ export const NAMED_SUBJECTS: readonly NamedSubject[] = [
     "Meet the Citibank employee who, attempting to send an interest payment, instead wired $900M of Citi's own money to Revlon's creditors with one click of a famously confusing UI. A federal judge initially ruled the recipients could keep the money. (It was later reversed on appeal — but for a long, beautiful moment, it was theirs.)",
     "Reuters, 2020.",
     "0004",
-    { primary_color: "#005B96", accent_color: "#E63946" },     // Citi blue + Revlon red
+    { primary_color: "#005B96", accent_color: "#F5E0E3" },     // Citi blue + a pale Revlon-red wash (readable contrast)
   ),
   makeNamedSubject(
     "The GitLab Backup Operator",
     "Site Reliability Engineer",
-    "Meet the SRE who, during an emergency database recovery in 2017, ran rm -rf on the wrong production server. All five backup methods had silently failed for months. The 18-hour recovery was livestreamed on YouTube. They are still employed there. The post-mortem is required reading.",
+    "Meet the SRE who, during an emergency database recovery in 2017, ran rm -rf on the wrong production server. All five backup methods had silently failed for months. The 18-hour recovery was livestreamed on YouTube. They kept their job. The post-mortem is required reading.",
     "GitLab public post-mortem, 2017.",
     "0005",
     { primary_color: "#FC6D26", accent_color: "#2E2E2E" },     // GitLab orange + terminal black
