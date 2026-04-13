@@ -472,4 +472,10 @@ describe("rollIdentity", () => {
   it("NAMED_SUBJECT_PROBABILITY is 0.005", () => {
     expect(NAMED_SUBJECT_PROBABILITY).toBe(0.005);
   });
+
+  it("is deterministic given the same seed", () => {
+    const a = rollIdentity(mulberry32(2026));
+    const b = rollIdentity(mulberry32(2026));
+    expect(a).toEqual(b);
+  });
 });

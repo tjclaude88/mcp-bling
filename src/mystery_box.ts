@@ -528,6 +528,18 @@ export function pickNamedSubject(rng: Rng): NamedSubject {
 export const NAMED_SUBJECT_PROBABILITY = 0.005;
 
 /**
+ * Personality fields are NOT rolled — they're held constant per the spec's
+ * non-goals (no behaviour-shaping injection). These defaults apply to every
+ * randomly-assembled bot. Named Subjects override with their own personality
+ * (see makeNamedSubject).
+ */
+const DEFAULT_PERSONALITY = {
+  tone: "polite",
+  formality: "professional",
+  humor: "dry",
+} as const;
+
+/**
  * Roll a complete identity. Two paths:
  *   1. With probability 0.5%, return a Named Subject (no random assembly).
  *   2. Otherwise, draw one trait from each pool, assemble the identity,
@@ -557,10 +569,13 @@ export function rollIdentity(rng: Rng = Math.random): RollOutput {
   }
 
   // Path 2: random assembly. Draw one entry from every pool.
-  const drawn: Record<CategoryKey, TraitEntry> = {} as Record<CategoryKey, TraitEntry>;
-  for (const [key, pool] of Object.entries(POOLS) as Array<[CategoryKey, TraitPool]>) {
-    drawn[key] = pickWeighted(pool, rng);
-  }
+  // Object.entries preserves insertion order for string keys (per ES2015),
+  // so per_trait below is stably ordered to match the POOLS declaration.
+  const drawn = Object.fromEntries(
+    (Object.entries(POOLS) as Array<[CategoryKey, TraitPool]>).map(
+      ([key, pool]) => [key, pickWeighted(pool, rng)] as const,
+    ),
+  ) as Record<CategoryKey, TraitEntry>;
 
   const per_trait: PerTrait[] = (Object.entries(drawn) as Array<[CategoryKey, TraitEntry]>).map(
     ([category, entry]) => ({ category, value: entry.value, band: entry.band }),
@@ -574,7 +589,7 @@ export function rollIdentity(rng: Rng = Math.random): RollOutput {
   const homunculus = rollHomunculusBlock(rng, tier);
   const identity: RolledIdentity = {
     name: drawn.name.value,
-    personality: { tone: "polite", formality: "professional", humor: "dry" },
+    personality: { ...DEFAULT_PERSONALITY },
     theme: {
       primary_color: drawn.theme_primary.value,
       accent_color: drawn.theme_accent.value,
