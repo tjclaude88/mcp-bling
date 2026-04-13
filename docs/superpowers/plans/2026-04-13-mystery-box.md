@@ -37,6 +37,9 @@ The single-file-for-mystery-box approach matches the project's existing flat `sr
 - **All commits via heredoc** with the `Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>` footer per the project's CLAUDE.md.
 - **Run `npm test` after each task to confirm the existing test suite still passes.** The MVP shipped 16 passing tests; this plan should add to that, never reduce it.
 - **Test file editing pattern.** When a task says "Append to `tests/mystery_box.test.ts`" and the snippet contains `import` lines, those imports must go at the **top** of the file alongside existing imports — JavaScript does not allow imports inside describe blocks. The `describe(...)` block goes at the bottom. Treat each task as: (a) merge new imports into the top, (b) append the new describe block at the end.
+- **MCP tool registration uses `registerTool`, not `tool()`.** The deprecated `tool()` overloads are what the existing code uses. New tools in this plan use the modern `server.registerTool(name, config, handler)` API which accepts `title`, `description`, `inputSchema`, `outputSchema`, and `annotations` in a single config object. Task 17 backports the existing two tools to the same API so the codebase is consistent.
+- **Tool handlers return structured + text content.** Per the MCP spec, when a tool has an `outputSchema` it should return a `structuredContent` object alongside the text `content`. The text version is for backwards compatibility; clients with newer SDKs use the structured object directly. All new tools follow this pattern.
+- **Errors return `isError: true`.** Per the MCP spec, tool execution errors must set `isError: true` on the result so clients can distinguish errors from successful responses. Plain `content` without the flag will be passed to the LLM as if it were a normal output.
 
 ---
 
@@ -1699,29 +1702,65 @@ Add this exported handler function above `registerTools`. The optional
 /**
  * Handler extracted so it can be unit-tested without spinning up a server.
  * Side effect: stores the roll in `lastRoll` for `save_last_roll`.
+ * Returns BOTH `content` (text-shaped, for backwards compat) AND
+ * `structuredContent` (the parsed object, used by SDK-aware clients).
  *
  * @param rng - optional deterministic RNG for tests; omit in production.
  */
 export async function rollIdentityHandler(rng?: Rng): Promise<{
   content: Array<{ type: "text"; text: string }>;
+  structuredContent: RollOutput;
 }> {
   const out = rng ? rollIdentity(rng) : rollIdentity();
   lastRoll = out;
   return {
     content: [{ type: "text" as const, text: JSON.stringify(out, null, 2) }],
+    structuredContent: out,
   };
 }
 ```
 
-Inside `registerTools`, after the existing two tool registrations, add:
+Inside `registerTools`, after the existing two tool registrations, add the
+output schema and tool registration. The schema lets clients validate the
+structured content without having to learn the shape from the description.
 
 ```typescript
   // Tool 3: roll_identity
-  // Generates a fresh random bot identity from the Mystery Box
-  server.tool(
+  // Generates a fresh random bot identity from the Mystery Box.
+  // Modifies internal state (the in-memory lastRoll cache) so it is not
+  // readOnly. Does not touch the filesystem or network.
+  const rollIdentityOutputSchema = {
+    identity: z.object({}).passthrough(),
+    rarity: z.object({
+      score: z.number(),
+      tier: z.string(),
+      percentile: z.number(),
+      per_trait: z.array(z.object({
+        category: z.string(),
+        value: z.string(),
+        band: z.string(),
+      })).nullable(),
+    }),
+    paragraph: z.string(),
+    framed: z.string(),
+    lore: z.string().nullable(),
+  };
+
+  server.registerTool(
     "roll_identity",
-    "WOW — Weird Office Workers. Roll a fresh random bot identity: a quirky office-worker character with a rarity score and a screenshot-ready share card",
-    {},
+    {
+      title: "Roll a WOW Identity",
+      description:
+        "WOW — Weird Office Workers. Roll a fresh random bot identity: a quirky office-worker character with a rarity score and a screenshot-ready share card. Stores the roll for save_last_roll and get_rarity_report.",
+      inputSchema: {},
+      outputSchema: rollIdentityOutputSchema,
+      annotations: {
+        readOnlyHint: false,        // mutates lastRoll
+        destructiveHint: false,     // no filesystem / external side effects
+        idempotentHint: false,      // each call produces a fresh random roll
+        openWorldHint: false,       // no external systems
+      },
+    },
     rollIdentityHandler,
   );
 ```
@@ -1786,6 +1825,7 @@ describe("saveLastRollHandler", () => {
     const parsed = JSON.parse(text);
     expect(parsed.error).toBeDefined();
     expect(parsed.error).toMatch(/no roll/i);
+    expect(result.isError).toBe(true);          // MCP spec requires this flag
   });
 
   it("writes the most recent roll's identity to the supplied path", async () => {
@@ -1853,16 +1893,21 @@ Add these exported functions, immediately below `rollIdentityHandler`:
  * matters because `bling.json` may have been hand-tuned.
  *
  * Returns { ok: true, backup: <path|null> } on success,
- *         { error: <message> } if nothing has been rolled this session.
+ *         { error: <message> } with isError: true if nothing has been rolled.
  */
 export async function saveLastRollHandler(targetPath: string): Promise<{
   content: Array<{ type: "text"; text: string }>;
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
 }> {
   if (lastRoll === null) {
+    const errorBody = {
+      error: "No roll has happened this session. Call roll_identity first.",
+    };
     return {
-      content: [{ type: "text" as const, text: JSON.stringify({
-        error: "No roll has happened this session. Call roll_identity first.",
-      }) }],
+      content: [{ type: "text" as const, text: JSON.stringify(errorBody) }],
+      structuredContent: errorBody,
+      isError: true,
     };
   }
 
@@ -1877,12 +1922,14 @@ export async function saveLastRollHandler(targetPath: string): Promise<{
   }
 
   await writeFile(targetPath, JSON.stringify(lastRoll.identity, null, 2), "utf-8");
+  const successBody = {
+    ok: true as const,
+    written_to: targetPath,
+    backup,
+  };
   return {
-    content: [{ type: "text" as const, text: JSON.stringify({
-      ok: true,
-      written_to: targetPath,
-      backup,
-    }) }],
+    content: [{ type: "text" as const, text: JSON.stringify(successBody) }],
+    structuredContent: successBody,
   };
 }
 
@@ -1896,11 +1943,30 @@ Inside `registerTools`, after the `roll_identity` registration, add:
 
 ```typescript
   // Tool 4: save_last_roll
-  // Writes the most-recent roll's identity to the bling.json path
-  server.tool(
+  // Writes the most-recent roll's identity to the bling.json path.
+  // Destructive — overwrites the target file (a backup is written first).
+  const saveLastRollOutputSchema = {
+    ok: z.boolean().optional(),
+    written_to: z.string().optional(),
+    backup: z.string().nullable().optional(),
+    error: z.string().optional(),
+  };
+
+  server.registerTool(
     "save_last_roll",
-    "Persist the most-recent WOW roll by writing it to the configured bling.json path. Any existing file at that path is first backed up to <path>.bak.",
-    {},
+    {
+      title: "Save Last WOW Roll to bling.json",
+      description:
+        "Persist the most-recent WOW roll by writing it to the configured bling.json path. If a file already exists at that path it is first copied to <path>.bak so user-tuned configs are recoverable. Returns the backup path (or null if the target was new).",
+      inputSchema: {},
+      outputSchema: saveLastRollOutputSchema,
+      annotations: {
+        readOnlyHint: false,        // writes to disk
+        destructiveHint: true,      // overwrites an existing file (with backup)
+        idempotentHint: false,      // a second call after a fresh roll writes a different identity
+        openWorldHint: true,        // touches the local filesystem
+      },
+    },
     () => saveLastRollHandler(blingPath),
   );
 ```
@@ -1965,6 +2031,7 @@ describe("getRarityReportHandler", () => {
     const text = result.content[0]!.text;
     const parsed = JSON.parse(text);
     expect(parsed.error).toBeDefined();
+    expect(result.isError).toBe(true);          // MCP spec requires this flag
   });
 });
 ```
@@ -1984,22 +2051,27 @@ Add this exported function, immediately below `saveLastRollHandler`:
  * wrapped in JSON, for consistency with the other tools that all return
  * JSON. Clients pull `.report` out of the parsed object and display it.
  *
- * Errors cleanly if no roll has happened this session.
+ * Errors with isError: true if no roll has happened this session.
  */
 export async function getRarityReportHandler(): Promise<{
   content: Array<{ type: "text"; text: string }>;
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
 }> {
   if (lastRoll === null) {
+    const errorBody = {
+      error: "No roll has happened this session. Call roll_identity first.",
+    };
     return {
-      content: [{ type: "text" as const, text: JSON.stringify({
-        error: "No roll has happened this session. Call roll_identity first.",
-      }) }],
+      content: [{ type: "text" as const, text: JSON.stringify(errorBody) }],
+      structuredContent: errorBody,
+      isError: true,
     };
   }
+  const successBody = { report: lastRoll.framed };
   return {
-    content: [{ type: "text" as const, text: JSON.stringify({
-      report: lastRoll.framed,
-    }) }],
+    content: [{ type: "text" as const, text: JSON.stringify(successBody) }],
+    structuredContent: successBody,
   };
 }
 ```
@@ -2008,11 +2080,28 @@ Inside `registerTools`, after the `save_last_roll` registration, add:
 
 ```typescript
   // Tool 5: get_rarity_report
-  // Returns the framed share card for the most-recent roll
-  server.tool(
+  // Returns the formatted share card (lore header, paragraph, lore footer)
+  // for the most-recent roll. Pure read of in-memory state.
+  const rarityReportOutputSchema = {
+    report: z.string().optional(),
+    error: z.string().optional(),
+  };
+
+  server.registerTool(
     "get_rarity_report",
-    "Return the screenshot-ready WOW share card for the most-recent roll",
-    {},
+    {
+      title: "Get WOW Rarity Report",
+      description:
+        "Return the formatted share card (lore header, paragraph, lore footer) for the most-recent WOW roll. The report is plain text designed to be screenshotted directly. Errors if no roll has happened this session.",
+      inputSchema: {},
+      outputSchema: rarityReportOutputSchema,
+      annotations: {
+        readOnlyHint: true,         // pure read of lastRoll
+        destructiveHint: false,
+        idempotentHint: true,       // multiple calls return the same report
+        openWorldHint: false,       // no external systems
+      },
+    },
     getRarityReportHandler,
   );
 ```
@@ -2188,7 +2277,199 @@ EOF
 
 ---
 
-### Task 17: Update CLAUDE.md to document WOW
+### Task 17: Backport MCP-spec compliance to the existing tools
+
+**Files:**
+- Modify: `src/tools.ts` (the `get_identity` and `get_theme_for_platform` registrations)
+- Modify: `tests/tools.test.ts` (assert `isError: true` on existing error paths)
+
+The existing two tools were written before this plan and use the deprecated
+`server.tool(...)` API, return errors without `isError: true`, and have no
+annotations or `outputSchema`. After Task 14 the new three tools are fully
+spec-compliant; this task brings the original two up to the same standard so
+the codebase is consistent. Behaviour is unchanged — this is a metadata-only
+refactor.
+
+- [ ] **Step 1: Add tests asserting `isError` on existing error paths**
+
+In `tests/tools.test.ts`, add this describe block (imports already present
+from earlier tasks):
+
+```typescript
+describe("existing tools — isError compliance", () => {
+  it("get_identity error response sets isError: true", async () => {
+    // Trigger the load failure by passing a path that does not exist.
+    // The handler is registered inline in registerTools; we test the
+    // exported handler-style equivalent. If `get_identity` does not have
+    // an exported handler yet, we extract one in Step 2 below.
+    const { getIdentityHandler } = await import("../src/tools.js");
+    const result = await getIdentityHandler("tests/fixtures/_does_not_exist.json");
+    expect(result.isError).toBe(true);
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(parsed.error).toBeDefined();
+  });
+
+  it("get_theme_for_platform error response sets isError: true", async () => {
+    const { getThemeForPlatformHandler } = await import("../src/tools.js");
+    const result = await getThemeForPlatformHandler("tests/fixtures/_does_not_exist.json", "terminal");
+    expect(result.isError).toBe(true);
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(parsed.error).toBeDefined();
+  });
+});
+```
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+Run: `npm test -- tools`
+Expected: FAIL — `getIdentityHandler` and `getThemeForPlatformHandler` are not exported yet.
+
+- [ ] **Step 3: Refactor `src/tools.ts` to extract handlers and use registerTool**
+
+Replace the existing tool registrations inside `registerTools` with the
+extracted-handler pattern matching the new tools. Also export the handlers.
+
+First, add these exported handler functions above `registerTools` (alongside
+the existing `rollIdentityHandler` etc. from earlier tasks):
+
+```typescript
+/**
+ * Handler extracted so it can be unit-tested without spinning up a server.
+ * Returns the configured bling.json's identity, with isError on load failure.
+ */
+export async function getIdentityHandler(blingPath: string): Promise<{
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+}> {
+  const result = await loadIdentity(blingPath);
+  if (!result.ok) {
+    const errorBody = { error: result.error };
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(errorBody) }],
+      structuredContent: errorBody,
+      isError: true,
+    };
+  }
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(result.identity, null, 2) }],
+    structuredContent: result.identity as unknown as Record<string, unknown>,
+  };
+}
+
+/**
+ * Handler extracted so it can be unit-tested without spinning up a server.
+ * Returns platform-specific theme styling, with isError on load failure.
+ */
+export async function getThemeForPlatformHandler(
+  blingPath: string,
+  platform: string,
+): Promise<{
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+}> {
+  const result = await loadIdentity(blingPath);
+  if (!result.ok) {
+    const errorBody = { error: result.error };
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(errorBody) }],
+      structuredContent: errorBody,
+      isError: true,
+    };
+  }
+  const theme = generateThemeForPlatform(result.identity, platform);
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(theme, null, 2) }],
+    structuredContent: theme,
+  };
+}
+```
+
+Then replace the two existing `server.tool(...)` calls inside `registerTools`
+with `server.registerTool(...)` calls:
+
+```typescript
+  // Tool 1: get_identity (refactored to registerTool with full spec compliance)
+  server.registerTool(
+    "get_identity",
+    {
+      title: "Get Bot Identity",
+      description:
+        "Get the bot's full identity from bling.json — name, personality, quirks, appearance, and theme colours. Returns the configured identity (hand-written or saved from a roll). Errors if bling.json is missing or invalid.",
+      inputSchema: {},
+      outputSchema: { /* loose — BlingIdentity is open-shape */ },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,        // reads from disk
+      },
+    },
+    () => getIdentityHandler(blingPath),
+  );
+
+  // Tool 2: get_theme_for_platform (refactored to registerTool)
+  server.registerTool(
+    "get_theme_for_platform",
+    {
+      title: "Get Theme for Platform",
+      description:
+        "Get platform-specific styling for the bot. Supported platforms: terminal (returns ANSI escape codes), web (CSS variables), slack, discord, ide. Unknown platforms get the raw hex theme colours.",
+      inputSchema: {
+        platform: z
+          .string()
+          .describe("Target platform: terminal, web, slack, discord, or ide"),
+      },
+      outputSchema: { /* loose — varies per platform */ },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,        // reads from disk
+      },
+    },
+    ({ platform }) => getThemeForPlatformHandler(blingPath, platform),
+  );
+```
+
+Note the **empty outputSchema (`{}`)** is intentional — both tools return
+shapes that vary (BlingIdentity is open-ended, theme output depends on
+platform). The annotations and isError flag are still meaningful even
+without strict output validation.
+
+- [ ] **Step 4: Run all tests**
+
+Run: `npm test`
+Expected: all tests PASS, including the two new isError assertions.
+
+- [ ] **Step 5: Build**
+
+Run: `npm run build`
+Expected: clean.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/tools.ts tests/tools.test.ts
+git commit -m "$(cat <<'EOF'
+refactor(tools): backport MCP spec compliance to existing tools
+
+Migrates get_identity and get_theme_for_platform to the modern
+registerTool API. Both now declare title, annotations
+(readOnlyHint + idempotentHint), and return structuredContent
+alongside text content. Error responses set isError: true so MCP
+clients can correctly distinguish failures from successful
+responses. Behaviour is unchanged — pure metadata refactor.
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 18: Update CLAUDE.md to document WOW
 
 **Files:**
 - Modify: `CLAUDE.md` (project-level — update Status line and Architecture)
@@ -2290,11 +2571,13 @@ EOF
 - §6 Paragraph generation — Task 8 (templates) + Task 9 (frame). ✅
 - §7 Randomness — Task 2 (mulberry32) + injected RNG throughout. ✅
 - §8 Persistence — Task 13 (save_last_roll) + module-level `lastRoll` state. ✅
-- §9 MCP tools — Tasks 12, 13, 14. ✅
+- §9 MCP tools — Tasks 12, 13, 14 (new tools); Task 17 (backport existing tools to same compliance). ✅
 - §10 Testing — schema test (Task 1 build), unit tests (every task), distribution test (Task 16). The "Named Subject test" from spec §10 is in Task 11. ✅
 - §11 Non-goals — respected throughout (no LLM, no behaviour injection, no i18n).
 - §12 File layout — followed exactly: one new file `src/mystery_box.ts`. ✅
 - §13 Open questions — defaults applied; flagged in the "After this plan ships" section.
+- **MCP spec compliance** (cross-cutting) — Tasks 12-14 and 17 ensure every tool uses `registerTool`, declares annotations, returns `isError` on failure, and returns `structuredContent` alongside text. ✅
+- **CLAUDE.md maintenance** — Task 18 keeps the project's instructions in sync with the new tools.
 
 **Placeholder scan** — no TBD/TODO/"add validation"/etc. in any task body. Every code block is complete. ✅
 
@@ -2314,5 +2597,50 @@ Critical and moderate bugs surfaced during plan review have been fixed inline:
 4. **(Moderate, conventions)** Added explicit "Test file editing pattern" guidance — imports go at the top, describe blocks at the bottom. Stops the engineer from accidentally writing imports inside describes.
 5. **(Moderate, Task 12)** `rollIdentityHandler` now accepts an optional `Rng` parameter so tests can be deterministic without changing production behaviour. Production calls have no argument.
 6. **(Moderate, Task 14)** `get_rarity_report` now returns JSON `{ "report": "<framed text>" }` instead of raw text. Matches the JSON-only contract of the other tools so clients have a uniform parsing path.
-7. **(New, Task 17)** Added a final task to update `CLAUDE.md` — Status line, source tree, gotchas — so future Claude sessions know WOW exists and that `save_last_roll` has backup behaviour.
+7. **(New, Task 18)** Added a final task to update `CLAUDE.md` — Status line, source tree, gotchas — so future Claude sessions know WOW exists and that `save_last_roll` has backup behaviour.
 8. **(Minor, Task 10)** Each Named Subject now has its own theme colours (Bob = corporate blue, Joaquín = Spanish red, Knight Capital = bankrupt black + gold, Citi = Citi blue + Revlon red, GitLab = GitLab orange + terminal black). Felt wrong to have all five 1-of-1s look identical.
+
+---
+
+## Plan Revision 3 — changelog (post MCP best-practices audit)
+
+The plan was audited against the local MCP cheat-sheet (`docs/mcp-reference.md`)
+and the official MCP spec (modelcontextprotocol.io, 2025-06-18 revision). All
+six identified gaps are now closed:
+
+1. **(Major, Tasks 13 + 14)** Error responses now set `isError: true` per the
+   MCP spec. Without this flag, MCP clients pass error JSON to the LLM as if
+   it were a successful tool result. Both `saveLastRollHandler` and
+   `getRarityReportHandler` set the flag on their no-roll error path; tests
+   assert it.
+2. **(Major, Task 13)** `save_last_roll` is registered with
+   `annotations: { destructiveHint: true, openWorldHint: true }`. This is how
+   MCP clients decide whether to require explicit user confirmation before
+   invoking a tool. Without `destructiveHint`, a client could auto-approve
+   `save_last_roll` and silently overwrite a hand-tuned `bling.json`.
+3. **(Moderate, Tasks 12 + 14)** Read-only / idempotency annotations added —
+   `roll_identity` is `readOnlyHint: false` (mutates `lastRoll` cache);
+   `get_rarity_report` is `readOnlyHint: true, idempotentHint: true`.
+4. **(Moderate, Tasks 12-14)** All three new tools declare an `outputSchema`
+   so clients can validate structured results. Schemas are intentionally
+   permissive (use `.optional()` and `.passthrough()` where the shape varies
+   between success and error).
+5. **(Moderate, Tasks 12-14)** All three new tools return both `content`
+   (text-shaped, for backwards compatibility) AND `structuredContent` (the
+   parsed object, used by SDK-aware clients). Avoids forcing every client to
+   `JSON.parse` the text payload.
+6. **(Moderate, Task 14)** `get_rarity_report` description rewritten:
+   *"Return the formatted share card (lore header, paragraph, lore footer)
+   for the most-recent WOW roll. The report is plain text designed to be
+   screenshotted directly."* — explicit about what's returned and why.
+7. **(New, Task 17)** Added a backport task that migrates the existing two
+   tools (`get_identity`, `get_theme_for_platform`) to `registerTool` with
+   matching annotations, `isError`, and `structuredContent`. Pure metadata
+   refactor; behaviour unchanged. Keeps the codebase consistent rather than
+   leaving a compliance split between old and new tools.
+8. **(API migration, Tasks 12-14 + 17)** All five tools now use the modern
+   `server.registerTool(name, config, handler)` API instead of the
+   deprecated `server.tool(...)` overloads. This is the SDK's recommended
+   pattern as of `@modelcontextprotocol/sdk` v1.29.
+
+CLAUDE.md update is now Task 18 (was Task 17). Total tasks: 18.
