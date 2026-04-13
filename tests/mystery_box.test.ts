@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore } from "../src/mystery_box.js";
+import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore, rollHomunculusBlock } from "../src/mystery_box.js";
 import type { TraitEntry, PerTrait } from "../src/types.js";
 
 describe("mulberry32", () => {
@@ -202,5 +202,45 @@ describe("tierFromScore", () => {
     [9999,  "HR Warned Us About"],
   ])("score %s → %s", (score, expected) => {
     expect(tierFromScore(score)).toBe(expected);
+  });
+});
+
+describe("rollHomunculusBlock", () => {
+  it("produces a 4-digit subject_id", () => {
+    const rng = mulberry32(11);
+    const block = rollHomunculusBlock(rng, "Filing Clerk");
+    expect(block.subject_id).toMatch(/^\d{4}$/);
+  });
+
+  it("uses the supplied tier as the classification", () => {
+    const rng = mulberry32(11);
+    const block = rollHomunculusBlock(rng, "C-Suite");
+    expect(block.classification).toBe("C-Suite");
+  });
+
+  it("picks a cohort from a known set", () => {
+    const allowed = new Set([
+      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+    ]);
+    const rng = mulberry32(11);
+    const block = rollHomunculusBlock(rng, "Team Lead");
+    expect(allowed.has(block.cohort)).toBe(true);
+  });
+
+  it("ingestion date is YYYY-MM-DD between 2024 and 2026", () => {
+    const rng = mulberry32(11);
+    const block = rollHomunculusBlock(rng, "Team Lead");
+    expect(block.ingested).toMatch(/^20(24|25|26)-\d{2}-\d{2}$/);
+  });
+
+  it("flag is one of the allowed values", () => {
+    const allowed = new Set([
+      "normal", "flagged for review", "redacted", "Do Not Contact",
+    ]);
+    const rng = mulberry32(7);
+    for (let i = 0; i < 50; i++) {
+      const block = rollHomunculusBlock(rng, "Filing Clerk");
+      expect(allowed.has(block.flag)).toBe(true);
+    }
   });
 });

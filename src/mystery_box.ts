@@ -9,7 +9,7 @@
 // Note: type imports grow as subsequent tasks reference more of them.
 // Keeping imports minimal — only the names actually used below.
 
-import type { TraitBand, TraitEntry, TraitPool, PerTrait } from "./types.js";
+import type { TraitBand, TraitEntry, TraitPool, PerTrait, HomunculusBlock } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Random number generation
@@ -296,4 +296,43 @@ export function tierFromScore(score: number): string {
     if (score >= min) return tier;
   }
   return "Filing Clerk";
+}
+
+// ---------------------------------------------------------------------------
+// HOMUNCULUS metadata generation
+// ---------------------------------------------------------------------------
+
+const COHORTS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
+
+const FLAG_POOL: TraitPool = [
+  { value: "normal",              band: "Common" },     // 50% weight
+  { value: "flagged for review",  band: "Uncommon" },   // 25% weight
+  { value: "redacted",            band: "Legendary" },  // 8% weight
+  { value: "Do Not Contact",      band: "Mythic" },     // 2% weight
+];
+
+/**
+ * Roll the HOMUNCULUS classified-document block that frames every rolled bot.
+ *
+ * subject_id:    a four-digit zero-padded number
+ * cohort:        random weekday name
+ * classification: passed in (the tier label)
+ * ingested:      a random date in 2024–2026
+ * flag:          weighted draw — most are "normal", rare ones are "redacted"
+ *                or "Do Not Contact"
+ */
+export function rollHomunculusBlock(rng: Rng, tier: string): HomunculusBlock {
+  const subject_id = String(Math.floor(rng() * 10000)).padStart(4, "0");
+  const cohort = COHORTS[Math.floor(rng() * COHORTS.length)]!;
+  const year = 2024 + Math.floor(rng() * 3);              // 2024 / 2025 / 2026
+  const month = String(1 + Math.floor(rng() * 12)).padStart(2, "0");
+  const day = String(1 + Math.floor(rng() * 28)).padStart(2, "0");  // 1–28 for safety
+  const flag = pickWeighted(FLAG_POOL, rng).value;
+  return {
+    subject_id,
+    cohort,
+    classification: tier,
+    ingested: `${year}-${month}-${day}`,
+    flag,
+  };
 }
