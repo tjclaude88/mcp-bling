@@ -9,7 +9,7 @@
 // Note: type imports grow as subsequent tasks reference more of them.
 // Keeping imports minimal — only the names actually used below.
 
-import type { TraitBand, TraitEntry, TraitPool, PerTrait, HomunculusBlock } from "./types.js";
+import type { TraitBand, TraitEntry, TraitPool, PerTrait, HomunculusBlock, RolledIdentity } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Random number generation
@@ -338,4 +338,49 @@ export function rollHomunculusBlock(rng: Rng, tier: string): HomunculusBlock {
     ingested: `${year}-${month}-${day}`,
     flag,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Paragraph templates
+// ---------------------------------------------------------------------------
+//
+// Slot syntax: {name}, {job_title}, {height}, {material}, {accessory},
+// {expression}, {desk_setup}, {habit}, {coffee_ritual}, {meeting_energy},
+// {passive_aggressive}.
+//
+// Templates are written so the slot fragments fit naturally — pool entries
+// are stored as full self-contained clauses.
+
+export const PARAGRAPH_TEMPLATES: readonly string[] = [
+  "Meet {name} — your new {job_title}. {material}, {expression}, {height}. {habit}, drinks {coffee_ritual}, and is {meeting_energy}. Signs off every email with \"{passive_aggressive}\".",
+  "{name}, {job_title}. Sits behind {desk_setup}. {material}, with {accessory}. {habit} and {meeting_energy}.",
+  "Introducing {name}, the office's resident {job_title}. {expression}, {material}. {coffee_ritual}. Famously {habit}.",
+  "{name} ({job_title}) — {height}, {material}, {accessory}. {desk_setup}. {habit}. Their entire personality in three words: \"{passive_aggressive}\".",
+  "Day one and {name} — your new {job_title} — has already {habit}. {desk_setup}. Drinks {coffee_ritual}. Always {meeting_energy}.",
+  "Meet {name}, {job_title}. {accessory}, {material}, {expression}. Their desk: {desk_setup}. Their thing: {habit}.",
+  "{name} is a {job_title}. {height}, {material}. {meeting_energy}. {coffee_ritual}. Will end every Slack message with \"{passive_aggressive}\".",
+  "{job_title}? {name}. {desk_setup}. {habit}. {expression}. Don't get on the wrong side of \"{passive_aggressive}\".",
+  "Subject: {name}. Function: {job_title}. Distinguishing features: {material}, {accessory}, {expression}. Notable behaviours: {habit}; {meeting_energy}; {coffee_ritual}.",
+  "{name}, {job_title}, has joined the team. {height}, {material}. Brings {desk_setup}. {habit}. Speaks in \"{passive_aggressive}\".",
+];
+
+/** Pick a template uniformly at random and fill its slots from the identity. */
+export function renderParagraph(identity: RolledIdentity, rng: Rng): string {
+  const template = PARAGRAPH_TEMPLATES[
+    Math.floor(rng() * PARAGRAPH_TEMPLATES.length)
+  ]!;
+  const slots: Record<string, string> = {
+    name: identity.name,
+    job_title: identity.office.job_title,
+    desk_setup: identity.office.desk_setup,
+    habit: identity.office.habit,
+    coffee_ritual: identity.office.coffee_ritual,
+    meeting_energy: identity.office.meeting_energy,
+    passive_aggressive: identity.office.passive_aggressive,
+    height: identity.physical?.height ?? "average build",
+    accessory: identity.physical?.accessory ?? "a lanyard",
+    expression: identity.physical?.expression ?? "neutral",
+    material: identity.physical?.material ?? "a cardigan",
+  };
+  return template.replace(/\{(\w+)\}/g, (_, key) => slots[key] ?? `{${key}}`);
 }

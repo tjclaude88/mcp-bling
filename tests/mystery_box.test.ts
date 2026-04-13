@@ -1,6 +1,34 @@
 import { describe, it, expect } from "vitest";
-import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore, rollHomunculusBlock } from "../src/mystery_box.js";
-import type { TraitEntry, PerTrait } from "../src/types.js";
+import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore, rollHomunculusBlock, renderParagraph, PARAGRAPH_TEMPLATES } from "../src/mystery_box.js";
+import type { TraitEntry, PerTrait, RolledIdentity } from "../src/types.js";
+
+const sampleIdentity: RolledIdentity = {
+  name: "Brenda from Accounts",
+  personality: { tone: "polite", formality: "professional", humor: "dry" },
+  theme: { primary_color: "#9C6B3A", accent_color: "#D9D9D9" },
+  physical: {
+    species: "human",
+    height: "permanently mid-sigh",
+    accessory: "a lanyard with 14 badges of varying importance",
+    expression: "polite disappointment",
+    material: "a cardigan, at least one",
+  },
+  office: {
+    job_title: "ASCII Comptroller",
+    desk_setup: "a coffee mug labelled WORLD'S OKAYEST DBA",
+    habit: "microwaves fish despite three separate HR warnings",
+    coffee_ritual: "black coffee, no nonsense",
+    meeting_energy: "always 4 minutes late, always with a reason",
+    passive_aggressive: "Per my last email",
+  },
+  homunculus: {
+    subject_id: "0147",
+    cohort: "Tuesday",
+    classification: "Middle Manager",
+    ingested: "2025-07-14",
+    flag: "flagged for review",
+  },
+};
 
 describe("mulberry32", () => {
   it("produces deterministic output for the same seed", () => {
@@ -255,5 +283,32 @@ describe("rollHomunculusBlock", () => {
       const block = rollHomunculusBlock(rng, "Filing Clerk");
       expect(allowed.has(block.flag)).toBe(true);
     }
+  });
+});
+
+describe("PARAGRAPH_TEMPLATES", () => {
+  it("contains exactly 10 templates", () => {
+    expect(PARAGRAPH_TEMPLATES.length).toBe(10);
+  });
+});
+
+describe("renderParagraph", () => {
+  it("includes the bot's name and job title", () => {
+    const rng = mulberry32(1);
+    const out = renderParagraph(sampleIdentity, rng);
+    expect(out).toContain("Brenda from Accounts");
+    expect(out).toContain("ASCII Comptroller");
+  });
+
+  it("includes at least one office trait", () => {
+    const rng = mulberry32(1);
+    const out = renderParagraph(sampleIdentity, rng);
+    expect(out).toMatch(/microwaves fish|WORLD'S OKAYEST DBA|Per my last email/);
+  });
+
+  it("is deterministic given the same seed", () => {
+    const a = renderParagraph(sampleIdentity, mulberry32(99));
+    const b = renderParagraph(sampleIdentity, mulberry32(99));
+    expect(a).toBe(b);
   });
 });
