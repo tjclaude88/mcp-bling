@@ -304,6 +304,9 @@ export function tierFromScore(score: number): string {
 
 const COHORTS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;
 
+// FLAG_POOL borrows BAND_WEIGHTS via pickWeighted — changing those
+// percentages will shift the flag distribution too. Cosmetic field,
+// so this coupling is intentional.
 const FLAG_POOL: TraitPool = [
   { value: "normal",              band: "Common" },     // 50% weight
   { value: "flagged for review",  band: "Uncommon" },   // 25% weight
@@ -326,7 +329,7 @@ export function rollHomunculusBlock(rng: Rng, tier: string): HomunculusBlock {
   const cohort = COHORTS[Math.floor(rng() * COHORTS.length)]!;
   const year = 2024 + Math.floor(rng() * 3);              // 2024 / 2025 / 2026
   const month = String(1 + Math.floor(rng() * 12)).padStart(2, "0");
-  const day = String(1 + Math.floor(rng() * 28)).padStart(2, "0");  // 1–28 for safety
+  const day = String(1 + Math.floor(rng() * 28)).padStart(2, "0");  // cap at 28 so we never produce an invalid date (e.g. Feb 30) without month-specific logic
   const flag = pickWeighted(FLAG_POOL, rng).value;
   return {
     subject_id,

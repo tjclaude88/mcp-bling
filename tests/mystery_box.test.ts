@@ -233,6 +233,19 @@ describe("rollHomunculusBlock", () => {
     expect(block.ingested).toMatch(/^20(24|25|26)-\d{2}-\d{2}$/);
   });
 
+  it("ingestion year actually varies across rolls", () => {
+    const rng = mulberry32(31);
+    const years = new Set<string>();
+    for (let i = 0; i < 100; i++) {
+      const block = rollHomunculusBlock(rng, "Filing Clerk");
+      years.add(block.ingested.slice(0, 4));
+    }
+    // With 3 possible years and 100 rolls, hard-coding to a single
+    // year would fail this. RNG luck cannot reduce to <2 distinct years
+    // across 100 trials when the underlying distribution is uniform across 3.
+    expect(years.size).toBeGreaterThanOrEqual(2);
+  });
+
   it("flag is one of the allowed values", () => {
     const allowed = new Set([
       "normal", "flagged for review", "redacted", "Do Not Contact",
