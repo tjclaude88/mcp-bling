@@ -6,9 +6,10 @@
 // Pools are intentionally small at first ship (~6 per category). Grow
 // to the spec's 30–60 per category as a follow-up — see plan §16.
 //
-// Note: type imports (TraitBand, TraitEntry, OfficeBlock, etc.) will be
-// added by subsequent tasks as they are referenced. Keeping imports
-// minimal here to avoid unused-import noise.
+// Note: type imports grow as subsequent tasks reference more of them.
+// Keeping imports minimal — only the names actually used below.
+
+import type { TraitBand, TraitEntry, TraitPool } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Random number generation
@@ -34,3 +35,65 @@ export function mulberry32(seed: number): () => number {
 
 /** A function returning a number in [0, 1). Math.random satisfies this. */
 export type Rng = () => number;
+
+// ---------------------------------------------------------------------------
+// Trait band weights and weighted selection
+// ---------------------------------------------------------------------------
+
+/**
+ * Per-draw probability of each rarity band, in percent.
+ * The same weights apply across every category for consistency,
+ * which keeps the rarity.tools formula simple.
+ */
+export const BAND_WEIGHTS: Record<TraitBand, number> = {
+  Common: 50,
+  Uncommon: 25,
+  Rare: 15,
+  Legendary: 8,
+  Mythic: 2,
+};
+
+/**
+ * Pick one entry from a pool, weighted by its band.
+ *
+ * Two-stage algorithm so that the probability of *each band* matches
+ * BAND_WEIGHTS regardless of how many entries each band has:
+ *
+ *   1. Group the pool's entries by band.
+ *   2. Pick a band weighted by BAND_WEIGHTS (restricted to bands present).
+ *   3. Pick uniformly among the entries in that band.
+ *
+ * This is critical: if we just summed BAND_WEIGHTS across every entry,
+ * a band with N entries would get N × its intended probability — and
+ * the rarity score formula (which uses BAND_WEIGHTS as the per-band
+ * probability) would no longer match reality.
+ *
+ * Consumes two rng() calls per invocation (deterministic in tests).
+ */
+export function pickWeighted(pool: TraitPool, rng: Rng): TraitEntry {
+  if (pool.length === 0) {
+    throw new Error("pickWeighted called on an empty pool");
+  }
+
+  // Stage 1: group by band
+  const byBand = new Map<TraitBand, TraitEntry[]>();
+  for (const entry of pool) {
+    const list = byBand.get(entry.band) ?? [];
+    list.push(entry);
+    byBand.set(entry.band, list);
+  }
+
+  // Stage 2: pick a band weighted by BAND_WEIGHTS, restricted to bands present
+  const present: TraitBand[] = Array.from(byBand.keys());
+  const total = present.reduce((sum, b) => sum + BAND_WEIGHTS[b], 0);
+  let roll = rng() * total;
+  let chosen: TraitBand = present[present.length - 1]!;     // safe fallback for float drift
+  for (const b of present) {
+    roll -= BAND_WEIGHTS[b];
+    if (roll <= 0) { chosen = b; break; }
+  }
+
+  // Stage 3: pick uniformly within the band
+  const candidates = byBand.get(chosen)!;
+  return candidates[Math.floor(rng() * candidates.length)]!;
+}
