@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore } from "../src/mystery_box.js";
+import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore } from "../src/mystery_box.js";
 import type { TraitEntry, PerTrait } from "../src/types.js";
 
 describe("mulberry32", () => {
@@ -185,5 +185,22 @@ describe("rarityScore", () => {
     // 9×2 + 3×(1/0.15) + 1×50 ≈ 18 + 20.0 + 50 = ~88
     expect(rarityScore(traits)).toBeGreaterThan(85);
     expect(rarityScore(traits)).toBeLessThan(92);
+  });
+});
+
+describe("tierFromScore", () => {
+  it.each([
+    [0,     "Filing Clerk"],
+    [24.99, "Filing Clerk"],
+    [25,    "Team Lead"],
+    [59.99, "Team Lead"],
+    [60,    "Middle Manager"],
+    [149.99,"Middle Manager"],
+    [150,   "C-Suite"],
+    [499.99,"C-Suite"],
+    [500,   "HR Warned Us About"],
+    [9999,  "HR Warned Us About"],
+  ])("score %s → %s", (score, expected) => {
+    expect(tierFromScore(score)).toBe(expected);
   });
 });

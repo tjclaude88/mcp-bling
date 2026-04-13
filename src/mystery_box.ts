@@ -272,3 +272,28 @@ export function rarityScore(traits: PerTrait[]): number {
   }
   return score;
 }
+
+// ---------------------------------------------------------------------------
+// Tier derivation
+// ---------------------------------------------------------------------------
+
+/**
+ * Tier thresholds from spec §5.4. Lower bound is inclusive; upper is
+ * exclusive (so a score of exactly 25 lands in Team Lead, not Filing
+ * Clerk).
+ */
+const TIER_THRESHOLDS: Array<{ min: number; tier: string }> = [
+  { min: 500, tier: "HR Warned Us About" },
+  { min: 150, tier: "C-Suite" },
+  { min: 60,  tier: "Middle Manager" },
+  { min: 25,  tier: "Team Lead" },
+  { min: 0,   tier: "Filing Clerk" },
+];
+
+/** Map a rarity score to a tier label. */
+export function tierFromScore(score: number): string {
+  for (const { min, tier } of TIER_THRESHOLDS) {
+    if (score >= min) return tier;
+  }
+  return "Filing Clerk";
+}
