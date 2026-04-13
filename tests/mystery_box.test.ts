@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore, rollHomunculusBlock, renderParagraph, PARAGRAPH_TEMPLATES, renderFramed } from "../src/mystery_box.js";
+import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore, rollHomunculusBlock, renderParagraph, PARAGRAPH_TEMPLATES, renderFramed, NAMED_SUBJECTS, pickNamedSubject } from "../src/mystery_box.js";
 import type { TraitEntry, PerTrait, RolledIdentity } from "../src/types.js";
 
 const sampleIdentity: RolledIdentity = {
@@ -393,5 +393,28 @@ describe("renderFramed", () => {
     expect(lines[3]).toBe("the body paragraph");
     expect(lines[4]).toBe("");
     expect(lines[5]).toMatch(/^—/);
+  });
+});
+
+describe("NAMED_SUBJECTS", () => {
+  it("ships exactly 5 hand-authored subjects", () => {
+    expect(NAMED_SUBJECTS.length).toBe(5);
+  });
+
+  it("each subject has identity, paragraph, and lore", () => {
+    for (const ns of NAMED_SUBJECTS) {
+      expect(typeof ns.identity.name).toBe("string");
+      expect(typeof ns.paragraph).toBe("string");
+      expect(typeof ns.lore).toBe("string");
+      expect(ns.identity.homunculus.flag).toBe("Do Not Contact");
+    }
+  });
+
+  it("pickNamedSubject returns one of the 5", () => {
+    const rng = mulberry32(2);
+    for (let i = 0; i < 20; i++) {
+      const ns = pickNamedSubject(rng);
+      expect(NAMED_SUBJECTS).toContain(ns);
+    }
   });
 });
