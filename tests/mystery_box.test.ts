@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore, rollHomunculusBlock, renderParagraph, PARAGRAPH_TEMPLATES, renderFramed, NAMED_SUBJECTS, pickNamedSubject } from "../src/mystery_box.js";
+import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore, rollHomunculusBlock, renderParagraph, PARAGRAPH_TEMPLATES, renderFramed, NAMED_SUBJECTS, pickNamedSubject, rollIdentity, NAMED_SUBJECT_PROBABILITY } from "../src/mystery_box.js";
 import type { TraitEntry, PerTrait, RolledIdentity } from "../src/types.js";
 
 const sampleIdentity: RolledIdentity = {
@@ -433,5 +433,43 @@ describe("NAMED_SUBJECTS", () => {
   it("subject_ids are unique across the 5 subjects", () => {
     const ids = NAMED_SUBJECTS.map((n) => n.identity.homunculus.subject_id);
     expect(new Set(ids).size).toBe(5);
+  });
+});
+
+describe("rollIdentity", () => {
+  it("returns a complete RollOutput", () => {
+    const out = rollIdentity(mulberry32(42));
+    expect(out.identity.name).toBeDefined();
+    expect(out.identity.office).toBeDefined();
+    expect(out.identity.homunculus).toBeDefined();
+    expect(typeof out.rarity.score).toBe("number");
+    expect(typeof out.rarity.tier).toBe("string");
+    expect(typeof out.paragraph).toBe("string");
+    expect(typeof out.framed).toBe("string");
+  });
+
+  it("classification matches the derived tier", () => {
+    const out = rollIdentity(mulberry32(42));
+    expect(out.identity.homunculus.classification).toBe(out.rarity.tier);
+  });
+
+  it("returns a Named Subject when the pre-roll hits", () => {
+    // Force the pre-roll to succeed: an RNG that always returns 0.
+    const alwaysZero: () => number = () => 0;
+    const out = rollIdentity(alwaysZero);
+    expect(out.lore).not.toBeNull();
+    expect(NAMED_SUBJECTS.map((s) => s.identity.name)).toContain(out.identity.name);
+  });
+
+  it("returns an assembled bot when the pre-roll misses", () => {
+    // RNG that always returns 0.99 — comfortably above any reasonable pre-roll.
+    const alwaysHigh: () => number = () => 0.99;
+    const out = rollIdentity(alwaysHigh);
+    expect(out.lore).toBeNull();
+    expect(out.rarity.per_trait).not.toBeNull();
+  });
+
+  it("NAMED_SUBJECT_PROBABILITY is 0.005", () => {
+    expect(NAMED_SUBJECT_PROBABILITY).toBe(0.005);
   });
 });

@@ -9,7 +9,7 @@
 // Note: type imports grow as subsequent tasks reference more of them.
 // Keeping imports minimal — only the names actually used below.
 
-import type { TraitBand, TraitEntry, TraitPool, PerTrait, HomunculusBlock, RolledIdentity } from "./types.js";
+import type { TraitBand, TraitEntry, TraitPool, PerTrait, HomunculusBlock, RolledIdentity, RollOutput } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Random number generation
@@ -518,4 +518,107 @@ export const NAMED_SUBJECTS: readonly NamedSubject[] = [
 /** Pick one Named Subject uniformly at random. */
 export function pickNamedSubject(rng: Rng): NamedSubject {
   return NAMED_SUBJECTS[Math.floor(rng() * NAMED_SUBJECTS.length)]!;
+}
+
+// ---------------------------------------------------------------------------
+// Main orchestrator
+// ---------------------------------------------------------------------------
+
+/** Probability that a roll returns a hand-authored Named Subject. */
+export const NAMED_SUBJECT_PROBABILITY = 0.005;
+
+/**
+ * Roll a complete identity. Two paths:
+ *   1. With probability 0.5%, return a Named Subject (no random assembly).
+ *   2. Otherwise, draw one trait from each pool, assemble the identity,
+ *      score it, derive the tier, render the paragraph, build the frame.
+ *
+ * `rng` defaults to Math.random — pass a seedable PRNG in tests.
+ */
+export function rollIdentity(rng: Rng = Math.random): RollOutput {
+  // Path 1: Named Subject pre-roll
+  if (rng() < NAMED_SUBJECT_PROBABILITY) {
+    const ns = pickNamedSubject(rng);
+    const score = 1000;
+    const percentile = 99;
+    const framed = renderFramed(ns.identity, ns.paragraph, score, percentile);
+    return {
+      identity: ns.identity,
+      rarity: {
+        score,
+        tier: "HR Warned Us About",
+        percentile,
+        per_trait: null,
+      },
+      paragraph: ns.paragraph,
+      framed,
+      lore: ns.lore,
+    };
+  }
+
+  // Path 2: random assembly. Draw one entry from every pool.
+  const drawn: Record<CategoryKey, TraitEntry> = {} as Record<CategoryKey, TraitEntry>;
+  for (const [key, pool] of Object.entries(POOLS) as Array<[CategoryKey, TraitPool]>) {
+    drawn[key] = pickWeighted(pool, rng);
+  }
+
+  const per_trait: PerTrait[] = (Object.entries(drawn) as Array<[CategoryKey, TraitEntry]>).map(
+    ([category, entry]) => ({ category, value: entry.value, band: entry.band }),
+  );
+
+  const score = rarityScore(per_trait);
+  const tier = tierFromScore(score);
+  const percentile = scoreToPercentile(score);
+
+  // Build the rolled identity from the drawn traits.
+  const homunculus = rollHomunculusBlock(rng, tier);
+  const identity: RolledIdentity = {
+    name: drawn.name.value,
+    personality: { tone: "polite", formality: "professional", humor: "dry" },
+    theme: {
+      primary_color: drawn.theme_primary.value,
+      accent_color: drawn.theme_accent.value,
+    },
+    physical: {
+      species: "human",
+      height: drawn.physical_height.value,
+      accessory: drawn.physical_accessory.value,
+      expression: drawn.physical_expression.value,
+      material: drawn.physical_material.value,
+    },
+    office: {
+      job_title: drawn.job_title.value,
+      desk_setup: drawn.desk_setup.value,
+      habit: drawn.habit.value,
+      coffee_ritual: drawn.coffee_ritual.value,
+      meeting_energy: drawn.meeting_energy.value,
+      passive_aggressive: drawn.passive_aggressive.value,
+    },
+    homunculus,
+  };
+
+  const paragraph = renderParagraph(identity, rng);
+  const framed = renderFramed(identity, paragraph, score, percentile);
+
+  return {
+    identity,
+    rarity: { score, tier, percentile, per_trait },
+    paragraph,
+    framed,
+    lore: null,
+  };
+}
+
+/**
+ * Approximate percentile from a rarity score.
+ * Rough mapping based on the tier distribution targets in spec §5.4.
+ * Good enough for the share-card display — exact percentile would require
+ * Monte-Carlo calibration of the actual pool weights.
+ */
+function scoreToPercentile(score: number): number {
+  if (score >= 500) return 99;
+  if (score >= 150) return 95;
+  if (score >= 60)  return 86;
+  if (score >= 25)  return 50;
+  return Math.max(1, Math.round((score / 25) * 50));
 }
