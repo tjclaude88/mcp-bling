@@ -3,7 +3,15 @@
 **Date:** 2026-04-13
 **Status:** Draft — awaiting user review
 **Project:** MCP Bling
+**Brand:** WOW — Weird Office Workers (user-facing name for this feature)
 **Supersedes:** N/A (new feature, builds on the 2026-04-10 MVP)
+
+> **Naming note.** "Mystery Box" is the *internal* working name (and what
+> all code identifiers use — `mystery_box.ts`, `rollIdentity`, etc.). The
+> *user-facing* brand is **WOW (Weird Office Workers)**. Anywhere a user
+> sees text — README, MCP tool descriptions, server-startup banner, share
+> card — uses WOW. This split lets us re-brand later without renaming
+> every file and function.
 
 > **Revision note (2026-04-13, second pass):** Framing rewritten to
 > "experiment-gone-wrong." Chip retired. Bots are now described as (comical)
