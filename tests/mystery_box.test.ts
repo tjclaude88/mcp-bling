@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mulberry32, BAND_WEIGHTS, pickWeighted } from "../src/mystery_box.js";
+import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS } from "../src/mystery_box.js";
 import type { TraitEntry } from "../src/types.js";
 
 describe("mulberry32", () => {
@@ -116,5 +116,45 @@ describe("pickWeighted", () => {
     const rng = mulberry32(7);
     const pick = pickWeighted(onePool, rng);
     expect(["x", "y"]).toContain(pick.value);
+  });
+});
+
+describe("POOLS", () => {
+  const expectedCategories = [
+    "name", "job_title", "desk_setup", "habit", "coffee_ritual",
+    "meeting_energy", "passive_aggressive",
+    "physical_height", "physical_accessory", "physical_expression",
+    "physical_material", "theme_primary", "theme_accent",
+  ];
+
+  it.each(expectedCategories)("has a non-empty %s pool", (cat) => {
+    const pool = (POOLS as Record<string, TraitEntry[]>)[cat];
+    expect(pool).toBeDefined();
+    expect(pool.length).toBeGreaterThan(0);
+  });
+
+  it("has all 13 categories", () => {
+    expect(Object.keys(POOLS).sort()).toEqual([...expectedCategories].sort());
+  });
+
+  it("every entry has a value and a valid band", () => {
+    const validBands = new Set(["Common", "Uncommon", "Rare", "Legendary", "Mythic"]);
+    for (const [cat, pool] of Object.entries(POOLS)) {
+      for (const entry of pool) {
+        expect(typeof entry.value).toBe("string");
+        expect(entry.value.length).toBeGreaterThan(0);
+        expect(validBands.has(entry.band)).toBe(true);
+      }
+    }
+  });
+
+  it("theme colour pools contain valid #RRGGBB hex strings", () => {
+    const hex = /^#[0-9A-Fa-f]{6}$/;
+    for (const cat of ["theme_primary", "theme_accent"]) {
+      const pool = (POOLS as Record<string, TraitEntry[]>)[cat]!;
+      for (const entry of pool) {
+        expect(entry.value).toMatch(hex);
+      }
+    }
   });
 });
