@@ -9,7 +9,7 @@
 // Note: type imports grow as subsequent tasks reference more of them.
 // Keeping imports minimal — only the names actually used below.
 
-import type { TraitBand, TraitEntry, TraitPool } from "./types.js";
+import type { TraitBand, TraitEntry, TraitPool, PerTrait } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Random number generation
@@ -245,3 +245,30 @@ export const POOLS = {
 } as const;
 
 export type CategoryKey = keyof typeof POOLS;
+
+// ---------------------------------------------------------------------------
+// Rarity scoring — rarity.tools formula
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute the rarity.tools score for a set of rolled traits.
+ *
+ * For each trait, contribute `1 / (band probability)`. Sum it up.
+ *
+ *   Common (50%)    → 2 points
+ *   Uncommon (25%)  → 4 points
+ *   Rare (15%)      → ~6.7 points
+ *   Legendary (8%)  → 12.5 points
+ *   Mythic (2%)     → 50 points
+ *
+ * The huge gap between Common and Mythic is the point — a single Mythic
+ * trait does more for the score than eight Commons combined.
+ */
+export function rarityScore(traits: PerTrait[]): number {
+  let score = 0;
+  for (const trait of traits) {
+    const probability = BAND_WEIGHTS[trait.band] / 100;
+    score += 1 / probability;
+  }
+  return score;
+}

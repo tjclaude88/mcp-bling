@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS } from "../src/mystery_box.js";
-import type { TraitEntry } from "../src/types.js";
+import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore } from "../src/mystery_box.js";
+import type { TraitEntry, PerTrait } from "../src/types.js";
 
 describe("mulberry32", () => {
   it("produces deterministic output for the same seed", () => {
@@ -156,5 +156,34 @@ describe("POOLS", () => {
         expect(entry.value).toMatch(hex);
       }
     }
+  });
+});
+
+describe("rarityScore", () => {
+  it("returns 26 for 13 Common traits", () => {
+    const traits: PerTrait[] = Array.from({ length: 13 }, (_, i) => ({
+      category: `cat${i}`,
+      value: `v${i}`,
+      band: "Common",
+    }));
+    // 13 × (1/0.5) = 26
+    expect(rarityScore(traits)).toBeCloseTo(26);
+  });
+
+  it("scores Mythic traits at ~50 each", () => {
+    const traits: PerTrait[] = [{ category: "x", value: "y", band: "Mythic" }];
+    // 1 / 0.02 = 50
+    expect(rarityScore(traits)).toBeCloseTo(50);
+  });
+
+  it("matches the worked example from spec §5.3 (9C + 3R + 1M)", () => {
+    const traits: PerTrait[] = [
+      ...Array(9).fill({ category: "c", value: "v", band: "Common" }),
+      ...Array(3).fill({ category: "c", value: "v", band: "Rare" }),
+      { category: "c", value: "v", band: "Mythic" },
+    ];
+    // 9×2 + 3×(1/0.15) + 1×50 ≈ 18 + 20.0 + 50 = ~88
+    expect(rarityScore(traits)).toBeGreaterThan(85);
+    expect(rarityScore(traits)).toBeLessThan(92);
   });
 });
