@@ -174,7 +174,7 @@ const PHYSICAL_HEIGHT: TraitPool = [
   { value: "average build",                                   band: "Common" },
   { value: "shorter than expected",                           band: "Common" },
   { value: "tall enough to comment on it",                    band: "Uncommon" },
-  { value: "permanently mid-sigh",                            band: "Rare" },
+  { value: "somehow taller in meetings than in person",      band: "Rare" },
   { value: "looms",                                           band: "Legendary" },
   { value: "occupies more conceptual than physical space",    band: "Mythic" },
 ];
