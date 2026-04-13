@@ -311,4 +311,44 @@ describe("renderParagraph", () => {
     const b = renderParagraph(sampleIdentity, mulberry32(99));
     expect(a).toBe(b);
   });
+
+  it("never leaves an unresolved {slot} placeholder in output (across many rolls)", () => {
+    const rng = mulberry32(42);
+    for (let i = 0; i < 200; i++) {
+      const out = renderParagraph(sampleIdentity, rng);
+      // If a template has a typo like {jobtitle} (missing underscore), the
+      // renderer's loud-failure mode leaves it visible in output.
+      expect(out).not.toMatch(/\{\w+\}/);
+    }
+  });
+
+  it("reaches every template across many rolls", () => {
+    const rng = mulberry32(7);
+    const seen = new Set<number>();
+    // Identify each rendered paragraph by matching against each template's
+    // full shape — replace each {slot} with a non-greedy wildcard, escape
+    // regex metacharacters in the rest, and anchor.
+    const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const patterns = PARAGRAPH_TEMPLATES.map((t) => {
+      const parts = t.split(/\{\w+\}/).map(escape);
+      return new RegExp("^" + parts.join(".*?") + "$");
+    });
+    for (let i = 0; i < 1000; i++) {
+      const out = renderParagraph(sampleIdentity, rng);
+      const idx = patterns.findIndex((re) => re.test(out));
+      if (idx >= 0) seen.add(idx);
+    }
+    expect(seen.size).toBe(PARAGRAPH_TEMPLATES.length);
+  });
+
+  it("falls back gracefully when physical fields are missing", () => {
+    const minimalIdentity: RolledIdentity = {
+      ...sampleIdentity,
+      physical: undefined,
+    };
+    const rng = mulberry32(3);
+    const out = renderParagraph(minimalIdentity, rng);
+    expect(out).not.toMatch(/\{\w+\}/);          // no unresolved placeholders
+    expect(out).not.toContain("undefined");      // no stringified undefined
+  });
 });

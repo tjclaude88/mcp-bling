@@ -352,16 +352,16 @@ export function rollHomunculusBlock(rng: Rng, tier: string): HomunculusBlock {
 // are stored as full self-contained clauses.
 
 export const PARAGRAPH_TEMPLATES: readonly string[] = [
-  "Meet {name} — your new {job_title}. {material}, {expression}, {height}. {habit}, drinks {coffee_ritual}, and is {meeting_energy}. Signs off every email with \"{passive_aggressive}\".",
-  "{name}, {job_title}. Sits behind {desk_setup}. {material}, with {accessory}. {habit} and {meeting_energy}.",
-  "Introducing {name}, the office's resident {job_title}. {expression}, {material}. {coffee_ritual}. Famously {habit}.",
-  "{name} ({job_title}) — {height}, {material}, {accessory}. {desk_setup}. {habit}. Their entire personality in three words: \"{passive_aggressive}\".",
-  "Day one and {name} — your new {job_title} — has already {habit}. {desk_setup}. Drinks {coffee_ritual}. Always {meeting_energy}.",
-  "Meet {name}, {job_title}. {accessory}, {material}, {expression}. Their desk: {desk_setup}. Their thing: {habit}.",
-  "{name} is a {job_title}. {height}, {material}. {meeting_energy}. {coffee_ritual}. Will end every Slack message with \"{passive_aggressive}\".",
-  "{job_title}? {name}. {desk_setup}. {habit}. {expression}. Don't get on the wrong side of \"{passive_aggressive}\".",
-  "Subject: {name}. Function: {job_title}. Distinguishing features: {material}, {accessory}, {expression}. Notable behaviours: {habit}; {meeting_energy}; {coffee_ritual}.",
-  "{name}, {job_title}, has joined the team. {height}, {material}. Brings {desk_setup}. {habit}. Speaks in \"{passive_aggressive}\".",
+  "Subject: {name}. Function: {job_title}. Build: {height}. Wears {material}. Carries {accessory}. Expression: {expression}. Habit: {habit}. Drinks {coffee_ritual}. Email sign-off: \"{passive_aggressive}\".",
+  "Meet {name} — your new {job_title}. They sit behind {desk_setup}. Most often, they {habit}. They drink {coffee_ritual}. In meetings they are {meeting_energy}.",
+  "{name}, {job_title}. Recognise them by {accessory} and {material}. Their build is {height}; their expression, {expression}. Notable habit: {habit}.",
+  "Personnel record — {name}, {job_title}. Distinguishing features: {material}; {accessory}; expression of {expression}. Notable behaviours: {habit}; {coffee_ritual}; {meeting_energy}.",
+  "Day one report. {name}, your new {job_title}, has already {habit}. Their desk: {desk_setup}. Their drink: {coffee_ritual}. Sign-off of choice: \"{passive_aggressive}\".",
+  "Introducing {name}, the office's {job_title}. Wears {material}. Carries {accessory}. They {habit} and they drink {coffee_ritual}. Catchphrase: \"{passive_aggressive}\".",
+  "Subject: {name}. Title: {job_title}. Stature: {height}. Demeanour: {expression}. Notable behaviour: {habit}. In meetings: {meeting_energy}.",
+  "{job_title}? That would be {name}. Sits behind {desk_setup}. Famously, they {habit}. Avoid the phrase \"{passive_aggressive}\" in their presence.",
+  "Field report — {name}, {job_title}. Outfit: {material}. Adornment: {accessory}. Build: {height}. Habit: {habit}. Drinks {coffee_ritual}.",
+  "{name}, {job_title}, has joined the team. Recognise them by {accessory} and {material}. Their habit: {habit}. Sign-off: \"{passive_aggressive}\".",
 ];
 
 /** Pick a template uniformly at random and fill its slots from the identity. */
