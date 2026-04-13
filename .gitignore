@@ -7,3 +7,4 @@ node_modules/
 # Environment files — may contain secrets
 .env
 .env.*
+.claude/
