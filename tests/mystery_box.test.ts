@@ -367,4 +367,31 @@ describe("renderFramed", () => {
     expect(out).toContain("ingested 2025-07-14");
     expect(out).toContain("flagged for review");
   });
+
+  it("uses correct ordinals (st/nd/rd/th, including teen exceptions)", () => {
+    expect(renderFramed(sampleIdentity, "p", 100, 1)).toContain("1st percentile");
+    expect(renderFramed(sampleIdentity, "p", 100, 2)).toContain("2nd percentile");
+    expect(renderFramed(sampleIdentity, "p", 100, 3)).toContain("3rd percentile");
+    // Teen exceptions — these MUST be "th", not "st/nd/rd"
+    expect(renderFramed(sampleIdentity, "p", 100, 11)).toContain("11th percentile");
+    expect(renderFramed(sampleIdentity, "p", 100, 12)).toContain("12th percentile");
+    expect(renderFramed(sampleIdentity, "p", 100, 13)).toContain("13th percentile");
+    // 21/22/23 are NOT teens — back to st/nd/rd
+    expect(renderFramed(sampleIdentity, "p", 100, 21)).toContain("21st percentile");
+    expect(renderFramed(sampleIdentity, "p", 100, 22)).toContain("22nd percentile");
+    expect(renderFramed(sampleIdentity, "p", 100, 23)).toContain("23rd percentile");
+    // 100s teens (111/112/113) — also "th"
+    expect(renderFramed(sampleIdentity, "p", 100, 113)).toContain("113th percentile");
+  });
+
+  it("layout is header / blank / paragraph / blank / footer", () => {
+    const out = renderFramed(sampleIdentity, "the body paragraph", 147.3, 91);
+    const lines = out.split("\n");
+    expect(lines[0]).toMatch(/^HOMUNCULUS CORPUS/);
+    expect(lines[1]).toMatch(/^Classification:/);
+    expect(lines[2]).toBe("");
+    expect(lines[3]).toBe("the body paragraph");
+    expect(lines[4]).toBe("");
+    expect(lines[5]).toMatch(/^—/);
+  });
 });
