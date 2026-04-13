@@ -1,0 +1,28 @@
+{
+  "name": "Chip",
+  "avatar_url": "https://example.com/chip.png",
+  "personality": {
+    "tone": "cheerful",
+    "formality": "casual",
+    "humor": "dry",
+    "catchphrase": "Let's rock and roll!",
+    "emoji_style": "moderate"
+  },
+  "quirks": {
+    "nervous_habit": "adds excessive ellipses...",
+    "celebration": "does a little ASCII dance",
+    "error_reaction": "apologises profusely",
+    "secret_talent": "surprisingly good at haiku"
+  },
+  "physical": {
+    "species": "robot",
+    "height": "tiny",
+    "accessory": "top hat",
+    "expression": "perpetual grin",
+    "material": "brushed metal"
+  },
+  "theme": {
+    "primary_color": "#FF6B35",
+    "accent_color": "#004E89"
+  }
+}

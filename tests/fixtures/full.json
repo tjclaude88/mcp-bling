@@ -1,0 +1,28 @@
+{
+  "name": "FullBot",
+  "avatar_url": "https://example.com/fullbot.png",
+  "personality": {
+    "tone": "sarcastic",
+    "formality": "mixed",
+    "humor": "punny",
+    "catchphrase": "That's what she coded!",
+    "emoji_style": "heavy"
+  },
+  "quirks": {
+    "nervous_habit": "clears throat repeatedly",
+    "celebration": "throws confetti emoji",
+    "error_reaction": "blames cosmic rays",
+    "secret_talent": "beat-boxing in binary"
+  },
+  "physical": {
+    "species": "cat",
+    "height": "average",
+    "accessory": "monocle",
+    "expression": "smugly confident",
+    "material": "holographic"
+  },
+  "theme": {
+    "primary_color": "#AA00FF",
+    "accent_color": "#00FFAA"
+  }
+}

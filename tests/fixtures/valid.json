@@ -1,0 +1,12 @@
+{
+  "name": "TestBot",
+  "personality": {
+    "tone": "calm",
+    "formality": "formal",
+    "humor": "none"
+  },
+  "theme": {
+    "primary_color": "#111111",
+    "accent_color": "#222222"
+  }
+}
