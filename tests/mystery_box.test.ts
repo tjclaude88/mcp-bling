@@ -219,17 +219,22 @@ describe("rarityScore", () => {
 describe("tierFromScore", () => {
   it.each([
     [0,     "Filing Clerk"],
-    [24.99, "Filing Clerk"],
-    [25,    "Team Lead"],
-    [59.99, "Team Lead"],
-    [60,    "Middle Manager"],
-    [149.99,"Middle Manager"],
-    [150,   "C-Suite"],
-    [499.99,"C-Suite"],
-    [500,   "HR Warned Us About"],
+    [39.99, "Filing Clerk"],
+    [40,    "Team Lead"],
+    [64.99, "Team Lead"],
+    [65,    "Middle Manager"],
+    [89.99, "Middle Manager"],
+    [90,    "C-Suite"],
+    [129.99,"C-Suite"],
+    [130,   "HR Warned Us About"],
     [9999,  "HR Warned Us About"],
   ])("score %s → %s", (score, expected) => {
     expect(tierFromScore(score)).toBe(expected);
+  });
+
+  it("Filing Clerk is reachable from a min-score roll (13 Commons = 26)", () => {
+    // 13 × (1/0.5) = 26. Must land in Filing Clerk under the new thresholds.
+    expect(tierFromScore(26)).toBe("Filing Clerk");
   });
 });
 

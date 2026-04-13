@@ -9,7 +9,7 @@
 // Note: type imports grow as subsequent tasks reference more of them.
 // Keeping imports minimal — only the names actually used below.
 
-import type { TraitBand, TraitEntry, TraitPool, PerTrait, HomunculusBlock, RolledIdentity, RollOutput } from "./types.js";
+import type { TraitBand, Tier, TraitEntry, TraitPool, PerTrait, HomunculusBlock, RolledIdentity, RollOutput } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Random number generation
@@ -278,20 +278,25 @@ export function rarityScore(traits: PerTrait[]): number {
 // ---------------------------------------------------------------------------
 
 /**
- * Tier thresholds from spec §5.4. Lower bound is inclusive; upper is
- * exclusive (so a score of exactly 25 lands in Team Lead, not Filing
- * Clerk).
+ * Tier thresholds. Lower bound is inclusive; upper is exclusive.
+ *
+ * Note on calibration: with 13 traits and BAND_WEIGHTS giving each
+ * band an equal *expected* contribution (1 point per draw), the
+ * average score is ~65 with std ~25. These thresholds are rough
+ * targets for visual variety in the tier label distribution. Task 16
+ * (the 10k-roll distribution test) is the calibration step that will
+ * tighten these to match the spec's intended ratios.
  */
-const TIER_THRESHOLDS: Array<{ min: number; tier: string }> = [
-  { min: 500, tier: "HR Warned Us About" },
-  { min: 150, tier: "C-Suite" },
-  { min: 60,  tier: "Middle Manager" },
-  { min: 25,  tier: "Team Lead" },
+const TIER_THRESHOLDS: Array<{ min: number; tier: Tier }> = [
+  { min: 130, tier: "HR Warned Us About" },
+  { min: 90,  tier: "C-Suite" },
+  { min: 65,  tier: "Middle Manager" },
+  { min: 40,  tier: "Team Lead" },
   { min: 0,   tier: "Filing Clerk" },
 ];
 
 /** Map a rarity score to a tier label. */
-export function tierFromScore(score: number): string {
+export function tierFromScore(score: number): Tier {
   for (const { min, tier } of TIER_THRESHOLDS) {
     if (score >= min) return tier;
   }
@@ -324,7 +329,7 @@ const FLAG_POOL: TraitPool = [
  * flag:          weighted draw — most are "normal", rare ones are "redacted"
  *                or "Do Not Contact"
  */
-export function rollHomunculusBlock(rng: Rng, tier: string): HomunculusBlock {
+export function rollHomunculusBlock(rng: Rng, tier: Tier): HomunculusBlock {
   const subject_id = String(Math.floor(rng() * 10000)).padStart(4, "0");
   const cohort = COHORTS[Math.floor(rng() * COHORTS.length)]!;
   const year = 2024 + Math.floor(rng() * 3);              // 2024 / 2025 / 2026
@@ -353,13 +358,13 @@ export function rollHomunculusBlock(rng: Rng, tier: string): HomunculusBlock {
 
 export const PARAGRAPH_TEMPLATES: readonly string[] = [
   "Subject: {name}. Function: {job_title}. Build: {height}. Wears {material}. Carries {accessory}. Expression: {expression}. Habit: {habit}. Drinks {coffee_ritual}. Email sign-off: \"{passive_aggressive}\".",
-  "Meet {name} — your new {job_title}. They sit behind {desk_setup}. Most often, they {habit}. They drink {coffee_ritual}. In meetings they are {meeting_energy}.",
+  "Meet {name} — your new {job_title}. {name} sits behind {desk_setup}. Most often, {name} {habit}. They drink {coffee_ritual}. In meetings they are {meeting_energy}.",
   "{name}, {job_title}. Recognise them by {accessory} and {material}. Their build is {height}; their expression, {expression}. Notable habit: {habit}.",
   "Personnel record — {name}, {job_title}. Distinguishing features: {material}; {accessory}; expression of {expression}. Notable behaviours: {habit}; {coffee_ritual}; {meeting_energy}.",
-  "Day one report. {name}, your new {job_title}, has already {habit}. Their desk: {desk_setup}. Their drink: {coffee_ritual}. Sign-off of choice: \"{passive_aggressive}\".",
-  "Introducing {name}, the office's {job_title}. Wears {material}. Carries {accessory}. They {habit} and they drink {coffee_ritual}. Catchphrase: \"{passive_aggressive}\".",
+  "Day one report. {name}, your new {job_title}, has already, somehow, broken something. Their desk: {desk_setup}. Their drink: {coffee_ritual}. Sign-off of choice: \"{passive_aggressive}\".",
+  "Introducing {name}, the office's {job_title}. Wears {material}. Carries {accessory}. Notable habit: {habit}. Drinks {coffee_ritual}. Catchphrase: \"{passive_aggressive}\".",
   "Subject: {name}. Title: {job_title}. Stature: {height}. Demeanour: {expression}. Notable behaviour: {habit}. In meetings: {meeting_energy}.",
-  "{job_title}? That would be {name}. Sits behind {desk_setup}. Famously, they {habit}. Avoid the phrase \"{passive_aggressive}\" in their presence.",
+  "{job_title}? That would be {name}. Sits behind {desk_setup}. Notable habit: {habit}. Avoid the phrase \"{passive_aggressive}\" in their presence.",
   "Field report — {name}, {job_title}. Outfit: {material}. Adornment: {accessory}. Build: {height}. Habit: {habit}. Drinks {coffee_ritual}.",
   "{name}, {job_title}, has joined the team. Recognise them by {accessory} and {material}. Their habit: {habit}. Sign-off: \"{passive_aggressive}\".",
 ];
@@ -631,9 +636,9 @@ export function rollIdentity(rng: Rng = Math.random): RollOutput {
  * Monte-Carlo calibration of the actual pool weights.
  */
 function scoreToPercentile(score: number): number {
-  if (score >= 500) return 99;
-  if (score >= 150) return 95;
-  if (score >= 60)  return 86;
-  if (score >= 25)  return 50;
-  return Math.max(1, Math.round((score / 25) * 50));
+  if (score >= 130) return 99;
+  if (score >= 90)  return 95;
+  if (score >= 65)  return 75;
+  if (score >= 40)  return 45;
+  return Math.max(1, Math.round((score / 40) * 30));
 }

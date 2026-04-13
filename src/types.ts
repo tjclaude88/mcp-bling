@@ -66,6 +66,14 @@ export type TraitBand =
   | "Legendary"
   | "Mythic";
 
+/** The 5 tier labels for rolled bots. Source: spec §5.4. */
+export type Tier =
+  | "Filing Clerk"
+  | "Team Lead"
+  | "Middle Manager"
+  | "C-Suite"
+  | "HR Warned Us About";
+
 /**
  * One option inside a trait pool.
  * `value` is what gets stored on the rolled identity.
@@ -93,7 +101,7 @@ export interface OfficeBlock {
 export interface HomunculusBlock {
   subject_id: string;
   cohort: string;
-  classification: string;
+  classification: Tier;
   ingested: string;
   flag: string;
 }
@@ -114,7 +122,7 @@ export interface PerTrait {
 /** The rarity report attached to a rolled identity. */
 export interface RarityReport {
   score: number;
-  tier: string;
+  tier: Tier;
   percentile: number;
   per_trait: PerTrait[] | null;
 }
