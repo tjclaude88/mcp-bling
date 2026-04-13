@@ -36,6 +36,7 @@ The single-file-for-mystery-box approach matches the project's existing flat `sr
 - **No exceptions thrown across module boundaries** — follow the existing `LoadResult`-style pattern (return `{ ok: false, error }` on failure).
 - **All commits via heredoc** with the `Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>` footer per the project's CLAUDE.md.
 - **Run `npm test` after each task to confirm the existing test suite still passes.** The MVP shipped 16 passing tests; this plan should add to that, never reduce it.
+- **Test file editing pattern.** When a task says "Append to `tests/mystery_box.test.ts`" and the snippet contains `import` lines, those imports must go at the **top** of the file alongside existing imports — JavaScript does not allow imports inside describe blocks. The `describe(...)` block goes at the bottom. Treat each task as: (a) merge new imports into the top, (b) append the new describe block at the end.
 
 ---
 
@@ -175,9 +176,9 @@ describe("mulberry32", () => {
   it("produces deterministic output for the same seed", () => {
     const a = mulberry32(42);
     const b = mulberry32(42);
-    expect(a()).toBeCloseTo(b());
-    expect(a()).toBeCloseTo(b());
-    expect(a()).toBeCloseTo(b());
+    expect(a()).toBe(b());
+    expect(a()).toBe(b());
+    expect(a()).toBe(b());
   });
 
   it("produces values in [0, 1)", () => {
@@ -192,7 +193,7 @@ describe("mulberry32", () => {
   it("produces different sequences for different seeds", () => {
     const a = mulberry32(1);
     const b = mulberry32(2);
-    expect(a()).not.toBeCloseTo(b());
+    expect(a()).not.toBe(b());      // exact equality — algorithm is bit-deterministic
   });
 });
 ```
@@ -319,7 +320,7 @@ describe("pickWeighted", () => {
     expect(pool).toContainEqual(pick);
   });
 
-  it("respects band weights over many draws", () => {
+  it("respects band weights over many draws (one entry per band)", () => {
     const rng = mulberry32(99);
     const counts = { common: 0, mythic: 0 };
     const N = 10_000;
@@ -333,6 +334,44 @@ describe("pickWeighted", () => {
     expect(counts.common / N).toBeLessThan(0.53);
     expect(counts.mythic / N).toBeGreaterThan(0.005);
     expect(counts.mythic / N).toBeLessThan(0.04);
+  });
+
+  it("band probabilities stay correct when a band has multiple entries", () => {
+    // Two Common entries — band probability should still be ~50%, NOT inflated.
+    const fatPool: TraitEntry[] = [
+      { value: "common-A",     band: "Common" },
+      { value: "common-B",     band: "Common" },
+      { value: "uncommon-A",   band: "Uncommon" },
+      { value: "rare-A",       band: "Rare" },
+      { value: "legendary-A",  band: "Legendary" },
+      { value: "mythic-A",     band: "Mythic" },
+    ];
+    const rng = mulberry32(101);
+    let common = 0;
+    const N = 10_000;
+    for (let i = 0; i < N; i++) {
+      const pick = pickWeighted(fatPool, rng);
+      if (pick.band === "Common") common++;
+    }
+    expect(common / N).toBeGreaterThan(0.47);
+    expect(common / N).toBeLessThan(0.53);
+  });
+
+  it("uniformly distributes within a band", () => {
+    const fatPool: TraitEntry[] = [
+      { value: "x", band: "Common" },
+      { value: "y", band: "Common" },
+    ];
+    const rng = mulberry32(7);
+    let xs = 0;
+    const N = 10_000;
+    for (let i = 0; i < N; i++) {
+      const pick = pickWeighted(fatPool, rng);
+      if (pick.value === "x") xs++;
+    }
+    // Should be ~50/50.
+    expect(xs / N).toBeGreaterThan(0.45);
+    expect(xs / N).toBeLessThan(0.55);
   });
 
   it("handles a pool with only one band present", () => {
@@ -376,27 +415,46 @@ export const BAND_WEIGHTS: Record<TraitBand, number> = {
 /**
  * Pick one entry from a pool, weighted by its band.
  *
- * Algorithm:
- *   1. Compute the total weight of all entries in the pool.
- *      (Multiple entries per band is fine — they share their band's weight.)
- *   2. Roll a random number in [0, total).
- *   3. Walk the pool, subtracting each entry's weight, until the roll lands.
+ * Two-stage algorithm so that the probability of *each band* matches
+ * BAND_WEIGHTS regardless of how many entries each band has:
+ *
+ *   1. Group the pool's entries by band.
+ *   2. Pick a band weighted by BAND_WEIGHTS (restricted to bands present).
+ *   3. Pick uniformly among the entries in that band.
+ *
+ * This is critical: if we just summed BAND_WEIGHTS across every entry,
+ * a band with N entries would get N × its intended probability — and
+ * the rarity score formula (which uses BAND_WEIGHTS as the per-band
+ * probability) would no longer match reality.
+ *
+ * Consumes two rng() calls per invocation (deterministic in tests).
  */
 export function pickWeighted(pool: TraitPool, rng: Rng): TraitEntry {
   if (pool.length === 0) {
     throw new Error("pickWeighted called on an empty pool");
   }
-  let total = 0;
+
+  // Stage 1: group by band
+  const byBand = new Map<TraitBand, TraitEntry[]>();
   for (const entry of pool) {
-    total += BAND_WEIGHTS[entry.band];
+    const list = byBand.get(entry.band) ?? [];
+    list.push(entry);
+    byBand.set(entry.band, list);
   }
+
+  // Stage 2: pick a band weighted by BAND_WEIGHTS, restricted to bands present
+  const present: TraitBand[] = Array.from(byBand.keys());
+  const total = present.reduce((sum, b) => sum + BAND_WEIGHTS[b], 0);
   let roll = rng() * total;
-  for (const entry of pool) {
-    roll -= BAND_WEIGHTS[entry.band];
-    if (roll <= 0) return entry;
+  let chosen: TraitBand = present[present.length - 1]!;     // safe fallback for float drift
+  for (const b of present) {
+    roll -= BAND_WEIGHTS[b];
+    if (roll <= 0) { chosen = b; break; }
   }
-  // Float drift fallback — return the last entry.
-  return pool[pool.length - 1]!;
+
+  // Stage 3: pick uniformly within the band
+  const candidates = byBand.get(chosen)!;
+  return candidates[Math.floor(rng() * candidates.length)]!;
 }
 ```
 
@@ -1284,11 +1342,12 @@ function makeNamedSubject(
   paragraph: string,
   lore: string,
   subject_id: string,
+  theme: { primary_color: string; accent_color: string },
 ): NamedSubject {
   const identity: RolledIdentity = {
     name,
     personality: { tone: "guarded", formality: "professional", humor: "dry" },
-    theme: { primary_color: "#1F4E79", accent_color: "#503D2E" },
+    theme,
     physical: { species: "human" },
     office: {
       job_title,
@@ -1316,6 +1375,7 @@ export const NAMED_SUBJECTS: readonly NamedSubject[] = [
     "Meet \"Bob\" — your new Senior Software Developer. Or rather: meet the Chinese consulting firm Bob paid roughly one-fifth of his six-figure salary to do his job, while he watched cat videos, browsed eBay, and posted on Reddit from his desk. Performance reviews praised his clean, well-documented code. Discovered only when Verizon noticed an unfamiliar VPN session.",
     "Verizon RISK Team report, 2013.",
     "0001",
+    { primary_color: "#1F4E79", accent_color: "#D9D9D9" },     // corporate blue
   ),
   makeNamedSubject(
     "Joaquín García",
@@ -1323,6 +1383,7 @@ export const NAMED_SUBJECTS: readonly NamedSubject[] = [
     "Meet Joaquín García — your new Property Supervisor. Drew a salary of €37,000 for six years without showing up to work. Caught only when nominated for a long-service award and the people handing it to him realised they did not know who he was. The investigation that followed required two separate departments to admit they each thought he reported to the other.",
     "The Guardian, 2016.",
     "0002",
+    { primary_color: "#A23E48", accent_color: "#F2D5A0" },     // Spanish red + sand
   ),
   makeNamedSubject(
     "The Knight Capital Deployment Engineer",
@@ -1330,6 +1391,7 @@ export const NAMED_SUBJECTS: readonly NamedSubject[] = [
     "Meet the engineer who deployed Knight Capital's new trading code to seven of eight servers and went home. The eighth server kept running the old code. In 45 minutes the firm executed $460M in unintended trades and effectively bankrupted itself. They were acquired four months later. Nobody talks about the eighth server.",
     "SEC report on Knight Capital Group's market disruption, 2012.",
     "0003",
+    { primary_color: "#1A1A1A", accent_color: "#FFD700" },     // bankrupt black + gold
   ),
   makeNamedSubject(
     "The Citibank Sender",
@@ -1337,6 +1399,7 @@ export const NAMED_SUBJECTS: readonly NamedSubject[] = [
     "Meet the Citibank employee who, attempting to send an interest payment, instead wired $900M of Citi's own money to Revlon's creditors with one click of a famously confusing UI. A federal judge initially ruled the recipients could keep the money. (It was later reversed on appeal — but for a long, beautiful moment, it was theirs.)",
     "Reuters, 2020.",
     "0004",
+    { primary_color: "#005B96", accent_color: "#E63946" },     // Citi blue + Revlon red
   ),
   makeNamedSubject(
     "The GitLab Backup Operator",
@@ -1344,6 +1407,7 @@ export const NAMED_SUBJECTS: readonly NamedSubject[] = [
     "Meet the SRE who, during an emergency database recovery in 2017, ran rm -rf on the wrong production server. All five backup methods had silently failed for months. The 18-hour recovery was livestreamed on YouTube. They are still employed there. The post-mortem is required reading.",
     "GitLab public post-mortem, 2017.",
     "0005",
+    { primary_color: "#FC6D26", accent_color: "#2E2E2E" },     // GitLab orange + terminal black
   ),
 ];
 
@@ -1613,26 +1677,35 @@ Add this import at the top of the file (alongside the existing imports):
 ```typescript
 import { rollIdentity } from "./mystery_box.js";
 import type { RollOutput } from "./types.js";
+import type { Rng } from "./mystery_box.js";
 ```
 
 Add a module-level variable to hold the last roll (for `save_last_roll` later):
 
 ```typescript
-/** The most-recent roll, kept in memory for `save_last_roll`. */
+/**
+ * The most-recent roll, kept in memory for `save_last_roll`.
+ * Note: single-process / single-client by design — this is fine for the
+ * MVP because the MCP server runs as a one-stdio-pair-per-client process.
+ */
 let lastRoll: RollOutput | null = null;
 ```
 
-Add this exported handler function above `registerTools`:
+Add this exported handler function above `registerTools`. The optional
+`rng` parameter is for tests — production calls have no argument and use
+`Math.random` via the orchestrator default.
 
 ```typescript
 /**
  * Handler extracted so it can be unit-tested without spinning up a server.
  * Side effect: stores the roll in `lastRoll` for `save_last_roll`.
+ *
+ * @param rng - optional deterministic RNG for tests; omit in production.
  */
-export async function rollIdentityHandler(): Promise<{
+export async function rollIdentityHandler(rng?: Rng): Promise<{
   content: Array<{ type: "text"; text: string }>;
 }> {
-  const out = rollIdentity();
+  const out = rng ? rollIdentity(rng) : rollIdentity();
   lastRoll = out;
   return {
     content: [{ type: "text" as const, text: JSON.stringify(out, null, 2) }],
@@ -1689,17 +1762,20 @@ EOF
 
 - [ ] **Step 1: Write the failing tests**
 
-Append to `tests/tools.test.ts`:
+Append to `tests/tools.test.ts`. Remember: imports go at the top of the
+file, the describe block goes at the bottom.
 
 ```typescript
 import { saveLastRollHandler, _resetLastRollForTests } from "../src/tools.js";
-import { writeFile, unlink, readFile } from "node:fs/promises";
+import { writeFile, unlink, readFile, stat } from "node:fs/promises";
 
 describe("saveLastRollHandler", () => {
   const testPath = "tests/fixtures/_temp_save.json";
+  const backupPath = `${testPath}.bak`;
 
   afterEach(async () => {
     try { await unlink(testPath); } catch { /* ignore */ }
+    try { await unlink(backupPath); } catch { /* ignore */ }
     _resetLastRollForTests();
   });
 
@@ -1723,6 +1799,31 @@ describe("saveLastRollHandler", () => {
     expect(written.office).toBeDefined();
     expect(written.homunculus).toBeDefined();
   });
+
+  it("backs up an existing file before overwriting", async () => {
+    // Pre-seed a fake existing config.
+    await writeFile(testPath, JSON.stringify({ name: "OldConfig" }), "utf-8");
+    await rollIdentityHandler();
+    const result = await saveLastRollHandler(testPath);
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(parsed.ok).toBe(true);
+    expect(parsed.backup).toBe(backupPath);
+
+    // Backup contains the original; main file contains the new roll.
+    const backup = JSON.parse(await readFile(backupPath, "utf-8"));
+    expect(backup.name).toBe("OldConfig");
+    const newConfig = JSON.parse(await readFile(testPath, "utf-8"));
+    expect(newConfig.name).not.toBe("OldConfig");
+  });
+
+  it("does not create a backup when the target file does not exist", async () => {
+    await rollIdentityHandler();
+    const result = await saveLastRollHandler(testPath);
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(parsed.ok).toBe(true);
+    expect(parsed.backup).toBeNull();
+    await expect(stat(backupPath)).rejects.toThrow();
+  });
 });
 ```
 
@@ -1738,7 +1839,7 @@ Expected: FAIL — `saveLastRollHandler` and `_resetLastRollForTests` not export
 Add this import at the top (with the other node imports — none exist yet, so add a new line):
 
 ```typescript
-import { writeFile } from "node:fs/promises";
+import { writeFile, copyFile, access } from "node:fs/promises";
 ```
 
 Add these exported functions, immediately below `rollIdentityHandler`:
@@ -1746,7 +1847,13 @@ Add these exported functions, immediately below `rollIdentityHandler`:
 ```typescript
 /**
  * Save the most-recent roll's identity to the given path.
- * Returns { ok: true } on success, { error } if nothing has been rolled.
+ *
+ * Safety: if the target file already exists, it is first copied to
+ * `<path>.bak` so the user's previous config is recoverable. This
+ * matters because `bling.json` may have been hand-tuned.
+ *
+ * Returns { ok: true, backup: <path|null> } on success,
+ *         { error: <message> } if nothing has been rolled this session.
  */
 export async function saveLastRollHandler(targetPath: string): Promise<{
   content: Array<{ type: "text"; text: string }>;
@@ -1758,10 +1865,23 @@ export async function saveLastRollHandler(targetPath: string): Promise<{
       }) }],
     };
   }
+
+  // If the target exists, back it up before overwriting.
+  let backup: string | null = null;
+  try {
+    await access(targetPath);                     // throws if missing
+    backup = `${targetPath}.bak`;
+    await copyFile(targetPath, backup);
+  } catch {
+    // File doesn't exist — nothing to back up.
+  }
+
   await writeFile(targetPath, JSON.stringify(lastRoll.identity, null, 2), "utf-8");
   return {
     content: [{ type: "text" as const, text: JSON.stringify({
-      ok: true, written_to: targetPath,
+      ok: true,
+      written_to: targetPath,
+      backup,
     }) }],
   };
 }
@@ -1779,7 +1899,7 @@ Inside `registerTools`, after the `roll_identity` registration, add:
   // Writes the most-recent roll's identity to the bling.json path
   server.tool(
     "save_last_roll",
-    "Persist the most-recent WOW roll by writing it to the configured bling.json path",
+    "Persist the most-recent WOW roll by writing it to the configured bling.json path. Any existing file at that path is first backed up to <path>.bak.",
     {},
     () => saveLastRollHandler(blingPath),
   );
@@ -1803,7 +1923,9 @@ git commit -m "$(cat <<'EOF'
 feat(tools): add save_last_roll MCP tool
 
 Writes the most-recent roll's identity to the configured bling.json
-path. Errors cleanly if no roll has happened this session.
+path. If a file already exists there it's backed up to <path>.bak
+first — bling.json may be hand-tuned and we never silently destroy
+user work. Errors cleanly if no roll has happened this session.
 _resetLastRollForTests is exported solely for test isolation.
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
@@ -1827,13 +1949,14 @@ Append to `tests/tools.test.ts`:
 import { getRarityReportHandler } from "../src/tools.js";
 
 describe("getRarityReportHandler", () => {
-  it("returns the framed share card after a roll", async () => {
+  it("returns the framed share card inside JSON after a roll", async () => {
     _resetLastRollForTests();
     await rollIdentityHandler();
     const result = await getRarityReportHandler();
-    const text = result.content[0]!.text;
-    expect(text).toContain("HOMUNCULUS CORPUS");
-    expect(text).toContain("RELATABILITY CORPUS v3.1");
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(typeof parsed.report).toBe("string");
+    expect(parsed.report).toContain("HOMUNCULUS CORPUS");
+    expect(parsed.report).toContain("RELATABILITY CORPUS v3.1");
   });
 
   it("returns an error when no roll has happened this session", async () => {
@@ -1857,7 +1980,10 @@ Add this exported function, immediately below `saveLastRollHandler`:
 
 ```typescript
 /**
- * Return the most-recent roll's framed share card (header + paragraph + footer).
+ * Return the most-recent roll's framed share card (header + paragraph + footer)
+ * wrapped in JSON, for consistency with the other tools that all return
+ * JSON. Clients pull `.report` out of the parsed object and display it.
+ *
  * Errors cleanly if no roll has happened this session.
  */
 export async function getRarityReportHandler(): Promise<{
@@ -1871,7 +1997,9 @@ export async function getRarityReportHandler(): Promise<{
     };
   }
   return {
-    content: [{ type: "text" as const, text: lastRoll.framed }],
+    content: [{ type: "text" as const, text: JSON.stringify({
+      report: lastRoll.framed,
+    }) }],
   };
 }
 ```
@@ -2060,6 +2188,87 @@ EOF
 
 ---
 
+### Task 17: Update CLAUDE.md to document WOW
+
+**Files:**
+- Modify: `CLAUDE.md` (project-level — update Status line and Architecture)
+
+This is the smallest possible doc maintenance: future Claude sessions need
+to know WOW exists.
+
+- [ ] **Step 1: Update the Status line**
+
+In `CLAUDE.md`, locate the line that reads:
+
+```
+- **Status:** Working MVP — MCP server with identity loading, validation, platform theming, and tests
+```
+
+Replace with:
+
+```
+- **Status:** Working MVP + WOW (Weird Office Workers) random-bot generator with weighted trait pools, rarity scoring, and a screenshot-ready share card
+```
+
+- [ ] **Step 2: Update the Architecture file tree**
+
+In the Architecture section, find the `src/` block and add `mystery_box.ts`
+on its own line, and update the comment for `tools.ts`:
+
+```
+  src/                 # Source code
+    index.ts           # MCP server entry point
+    identity.ts        # Identity loading and validation
+    tools.ts           # MCP tool definitions (5 tools — get_identity, get_theme_for_platform, roll_identity, save_last_roll, get_rarity_report)
+    types.ts           # TypeScript type definitions
+    mystery_box.ts     # WOW — pools, roller, scorer, paragraph templates, Named Subjects
+```
+
+And in the `tests/` block, add the new test file:
+
+```
+  tests/               # Test files
+    identity.test.ts   # Identity loading tests
+    tools.test.ts      # Tool handler tests
+    mystery_box.test.ts # WOW roller, scorer, templates, distribution tests
+    fixtures/          # Test fixture files
+      ...
+```
+
+- [ ] **Step 3: Add a Gotcha entry**
+
+In the Gotchas section, append:
+
+```
+- **`save_last_roll` backs up before overwriting** — when the user calls
+  `save_last_roll`, any existing `bling.json` is first copied to
+  `bling.json.bak`. Hand-tuned configs are recoverable; the new roll
+  becomes the active config.
+```
+
+- [ ] **Step 4: Verify the project still builds and tests pass**
+
+Run: `npm run build && npm test`
+Expected: clean build, all tests pass.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add CLAUDE.md
+git commit -m "$(cat <<'EOF'
+docs(claude-md): document WOW and the new MCP tools
+
+Updates the project status line, the source tree, and the gotchas
+section so future sessions know WOW exists and that save_last_roll
+has backup behaviour.
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
 ## After this plan ships
 
 1. **Pool expansion.** Spec calls for 30–60 entries per category. Starter set is 6. Worth a separate small task per category — easy to delegate, no logic touched.
@@ -2091,4 +2300,19 @@ EOF
 
 **Type consistency** — `RollOutput`, `RolledIdentity`, `RarityReport`, `PerTrait`, `OfficeBlock`, `HomunculusBlock` are defined once in Task 1 and used consistently downstream. `rollIdentity()` signature matches across Tasks 11, 12, 13, 14. ✅
 
-No issues to fix.
+No issues to fix in the structure of the plan; revision pass below addresses bugs found in code review.
+
+---
+
+## Plan Revision 2 — changelog (post code-review)
+
+Critical and moderate bugs surfaced during plan review have been fixed inline:
+
+1. **(Critical, Task 3)** `pickWeighted` rewritten as a two-stage algorithm — pick band first using `BAND_WEIGHTS`, then pick uniformly within band. Previous version inflated band probabilities whenever a band had multiple entries, breaking the rarity score's accuracy. Tests in Task 3 expanded to verify multi-entry bands behave correctly.
+2. **(Critical, Task 13)** `save_last_roll` now backs up the target file to `<path>.bak` before overwriting. The user's hand-tuned config is recoverable. Two new tests (back-up created when target exists; back-up *not* created when target is fresh).
+3. **(Moderate, Task 2)** `mulberry32` "different sequences for different seeds" test changed from `not.toBeCloseTo` (could flake on coincidentally-near values) to `not.toBe` (exact equality — appropriate for a bit-deterministic algorithm).
+4. **(Moderate, conventions)** Added explicit "Test file editing pattern" guidance — imports go at the top, describe blocks at the bottom. Stops the engineer from accidentally writing imports inside describes.
+5. **(Moderate, Task 12)** `rollIdentityHandler` now accepts an optional `Rng` parameter so tests can be deterministic without changing production behaviour. Production calls have no argument.
+6. **(Moderate, Task 14)** `get_rarity_report` now returns JSON `{ "report": "<framed text>" }` instead of raw text. Matches the JSON-only contract of the other tools so clients have a uniform parsing path.
+7. **(New, Task 17)** Added a final task to update `CLAUDE.md` — Status line, source tree, gotchas — so future Claude sessions know WOW exists and that `save_last_roll` has backup behaviour.
+8. **(Minor, Task 10)** Each Named Subject now has its own theme colours (Bob = corporate blue, Joaquín = Spanish red, Knight Capital = bankrupt black + gold, Citi = Citi blue + Revlon red, GitLab = GitLab orange + terminal black). Felt wrong to have all five 1-of-1s look identical.
