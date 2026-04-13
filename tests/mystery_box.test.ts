@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore, rollHomunculusBlock, renderParagraph, PARAGRAPH_TEMPLATES } from "../src/mystery_box.js";
+import { mulberry32, BAND_WEIGHTS, pickWeighted, POOLS, rarityScore, tierFromScore, rollHomunculusBlock, renderParagraph, PARAGRAPH_TEMPLATES, renderFramed } from "../src/mystery_box.js";
 import type { TraitEntry, PerTrait, RolledIdentity } from "../src/types.js";
 
 const sampleIdentity: RolledIdentity = {
@@ -350,5 +350,21 @@ describe("renderParagraph", () => {
     const out = renderParagraph(minimalIdentity, rng);
     expect(out).not.toMatch(/\{\w+\}/);          // no unresolved placeholders
     expect(out).not.toContain("undefined");      // no stringified undefined
+  });
+});
+
+describe("renderFramed", () => {
+  it("includes header and footer with the homunculus block fields", () => {
+    const out = renderFramed(sampleIdentity, "the body paragraph", 147.3, 91);
+    expect(out).toContain("HOMUNCULUS CORPUS");
+    expect(out).toContain("Subject 0147");
+    expect(out).toContain("Cohort: Tuesday");
+    expect(out).toContain("Classification: Middle Manager");
+    expect(out).toContain("Rarity 147.3");
+    expect(out).toContain("91st percentile");
+    expect(out).toContain("the body paragraph");
+    expect(out).toContain("RELATABILITY CORPUS v3.1");
+    expect(out).toContain("ingested 2025-07-14");
+    expect(out).toContain("flagged for review");
   });
 });

@@ -384,3 +384,45 @@ export function renderParagraph(identity: RolledIdentity, rng: Rng): string {
   };
   return template.replace(/\{(\w+)\}/g, (_, key) => slots[key] ?? `{${key}}`);
 }
+
+// ---------------------------------------------------------------------------
+// Lore frame — header + paragraph + footer
+// ---------------------------------------------------------------------------
+
+/**
+ * Return the English ordinal suffix for a non-negative integer:
+ * 1 -> "st", 2 -> "nd", 3 -> "rd", everything else -> "th"
+ * (with the 11/12/13 teen exceptions).
+ */
+function ordinalSuffix(n: number): string {
+  const abs = Math.abs(Math.trunc(n));
+  const mod100 = abs % 100;
+  if (mod100 >= 11 && mod100 <= 13) return "th";
+  switch (abs % 10) {
+    case 1: return "st";
+    case 2: return "nd";
+    case 3: return "rd";
+    default: return "th";
+  }
+}
+
+/**
+ * Wrap the rendered paragraph in the HOMUNCULUS classified-document frame.
+ * This is the screenshot-ready "share card" string that clients can display
+ * verbatim.
+ */
+export function renderFramed(
+  identity: RolledIdentity,
+  paragraph: string,
+  score: number,
+  percentile: number,
+): string {
+  const h = identity.homunculus;
+  const suffix = ordinalSuffix(percentile);
+  const header =
+    `HOMUNCULUS CORPUS · Subject ${h.subject_id} · Cohort: ${h.cohort}\n` +
+    `Classification: ${h.classification} · Rarity ${score.toFixed(1)} · ${percentile}${suffix} percentile`;
+  const footer =
+    `— RELATABILITY CORPUS v3.1 · ingested ${h.ingested} · ${h.flag}`;
+  return `${header}\n\n${paragraph}\n\n${footer}`;
+}
