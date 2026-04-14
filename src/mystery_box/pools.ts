@@ -333,12 +333,56 @@ const MEETING_ENERGY: TraitPool = [
 ];
 
 const PASSIVE_AGGRESSIVE: TraitPool = [
+  // Common (21) — widely-recognised corporate euphemisms
   { value: "Per my last email",                            band: "Common" },
   { value: "Just circling back",                           band: "Common" },
+  { value: "Just following up",                            band: "Common" },
+  { value: "Gentle reminder",                              band: "Common" },
+  { value: "Friendly reminder",                            band: "Common" },
+  { value: "Bumping this to the top of your inbox",        band: "Common" },
+  { value: "Any update on this",                           band: "Common" },
+  { value: "Just checking in",                             band: "Common" },
+  { value: "As a reminder",                                band: "Common" },
+  { value: "Not sure if you saw my last message",          band: "Common" },
+  { value: "Hoping to close the loop on this",             band: "Common" },
+  { value: "Flagging this again",                          band: "Common" },
+  { value: "Wanted to make sure this didn't fall through the cracks", band: "Common" },
+  { value: "Thanks in advance",                            band: "Common" },
+  { value: "Noted",                                        band: "Common" },
+  { value: "Thanks for your patience",                     band: "Common" },
+  { value: "Just to be clear",                             band: "Common" },
+  { value: "Looping back on this",                         band: "Common" },
+  { value: "Sorry for the double email",                   band: "Common" },
+  { value: "Pinging on this",                              band: "Common" },
+  { value: "Tagging for visibility",                       band: "Common" },
+  // Uncommon (12) — classic avoidance / deflection
   { value: "Happy to discuss offline",                     band: "Uncommon" },
+  { value: "Let's take this to a smaller group",           band: "Uncommon" },
+  { value: "I think there may be some confusion here",     band: "Uncommon" },
+  { value: "Correct me if I'm wrong",                      band: "Uncommon" },
+  { value: "With all due respect",                         band: "Uncommon" },
+  { value: "Just my two cents",                            band: "Uncommon" },
+  { value: "Going forward, let's make sure",               band: "Uncommon" },
+  { value: "I'll let you two take it from here",           band: "Uncommon" },
+  { value: "As I mentioned before",                        band: "Uncommon" },
+  { value: "I'm sure you have a good reason for this",     band: "Uncommon" },
+  { value: "Can you help me understand your thinking here", band: "Uncommon" },
+  { value: "To your point",                                band: "Uncommon" },
+  // Rare (7) — thinly-veiled hostility
   { value: "Resending with urgency (same email, 8 minutes later, red exclamation)", band: "Rare" },
+  { value: "Reattaching the document you clearly didn't open", band: "Rare" },
+  { value: "Cc'ing your manager so we're all aligned",     band: "Rare" },
+  { value: "Moving this to the top of the thread for the third time", band: "Rare" },
+  { value: "I'll take the silence as a yes",               band: "Rare" },
+  { value: "Happy to jump on a call to explain it again",  band: "Rare" },
+  { value: "Just so we're on the same page (we are not)",  band: "Rare" },
+  // Legendary (3) — weapons-grade
   { value: "As discussed (it was not discussed)",          band: "Legendary" },
+  { value: "Per our previous conversation (there was no previous conversation)", band: "Legendary" },
+  { value: "Let me know your thoughts by EOD (it is currently 4:47 p.m.)", band: "Legendary" },
+  // Mythic (2) — behaviour-as-phrase
   { value: "Adding a +1 with no further comment",          band: "Mythic" },
+  { value: "Responding only with a calendar invite",       band: "Mythic" },
 ];
 
 const PHYSICAL_HEIGHT: TraitPool = [
