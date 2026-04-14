@@ -122,12 +122,56 @@ const JOB_TITLES: TraitPool = [
 ];
 
 const DESK_SETUPS: TraitPool = [
-  { value: "a single dying succulent",                     band: "Common" },
-  { value: "a coffee mug labelled WORLD'S OKAYEST DBA",    band: "Common" },
-  { value: "a moleskine that nobody has ever seen open",   band: "Uncommon" },
-  { value: "a 9-monitor day-trading rig",                  band: "Rare" },
-  { value: "forty unwashed mugs in a stable equilibrium",  band: "Legendary" },
-  { value: "a full-size cardboard cutout of Nicolas Cage", band: "Mythic" },
+  // Common (21) — boring, recognisable office detritus
+  { value: "a single dying succulent",                                            band: "Common" },
+  { value: "a coffee mug labelled WORLD'S OKAYEST DBA",                           band: "Common" },
+  { value: "a half-drunk mug of cold tea",                                        band: "Common" },
+  { value: "a tower of Post-its nobody has read",                                 band: "Common" },
+  { value: "an ergonomic keyboard they never use",                                band: "Common" },
+  { value: "a framed photo of a dog that isn't theirs",                           band: "Common" },
+  { value: "a wrist rest flattened by years of use",                              band: "Common" },
+  { value: "a desk fan angled at exactly one shoulder",                           band: "Common" },
+  { value: "a tangle of three different charging cables",                         band: "Common" },
+  { value: "a bowl of mints from a 2019 conference",                              band: "Common" },
+  { value: "a stress ball with the logo worn off",                                band: "Common" },
+  { value: "a cracked mousepad held together with tape",                          band: "Common" },
+  { value: "a stack of unopened internal newsletters",                            band: "Common" },
+  { value: "a wobbly monitor riser made of old textbooks",                        band: "Common" },
+  { value: "a water bottle with a faded motivational slogan",                     band: "Common" },
+  { value: "a pen pot containing only dead biros",                                band: "Common" },
+  { value: "a laminated fire evacuation map from two offices ago",                band: "Common" },
+  { value: "a wall calendar still showing last February",                         band: "Common" },
+  { value: "a drawer that only opens halfway",                                    band: "Common" },
+  { value: "an office chair missing one armrest",                                 band: "Common" },
+  { value: "a half-eaten cereal bar from Tuesday",                                band: "Common" },
+  // Uncommon (12) — mildly personal, slightly revealing
+  { value: "a moleskine that nobody has ever seen open",                          band: "Uncommon" },
+  { value: "a tiny zen garden raked into tight spirals",                          band: "Uncommon" },
+  { value: "a printed spreadsheet annotated in three colours of highlighter",     band: "Uncommon" },
+  { value: "a photo of themselves shaking hands with a minor politician",         band: "Uncommon" },
+  { value: "a Rubik's cube solved on exactly one face",                           band: "Uncommon" },
+  { value: "a terrarium of moss they whisper to",                                 band: "Uncommon" },
+  { value: "a handwritten list of enemies, folded twice",                         band: "Uncommon" },
+  { value: "a small trophy for a fun run they didn't finish",                     band: "Uncommon" },
+  { value: "a jar of elastic bands sorted by thickness",                          band: "Uncommon" },
+  { value: "a chipped teacup inherited from a grandmother",                       band: "Uncommon" },
+  { value: "a noise-cancelling headset worn even during lunch",                   band: "Uncommon" },
+  { value: "a postcard from nowhere in particular, pinned up for nine years",     band: "Uncommon" },
+  // Rare (7) — excessive, pointed, conspicuous
+  { value: "a 9-monitor day-trading rig",                                         band: "Rare" },
+  { value: "a standing desk stuck permanently at its highest setting",            band: "Rare" },
+  { value: "a full mechanical keyboard wired to a foot pedal",                    band: "Rare" },
+  { value: "an aquarium of increasingly anxious goldfish",                        band: "Rare" },
+  { value: "a collection of seventeen identical black notebooks",                 band: "Rare" },
+  { value: "a framed cease-and-desist letter displayed with pride",               band: "Rare" },
+  { value: "a desk entirely carpeted in press clippings about themselves",        band: "Rare" },
+  // Legendary (3) — folklore, whispered-about
+  { value: "forty unwashed mugs in a stable equilibrium",                         band: "Legendary" },
+  { value: "a potted fern that has outlived three managers and a merger",         band: "Legendary" },
+  { value: "a chair that creaks in a rhythm nobody can quite place",              band: "Legendary" },
+  // Mythic (2) — surreal, impossible
+  { value: "a full-size cardboard cutout of Nicolas Cage",                        band: "Mythic" },
+  { value: "a second identical desk facing theirs, always occupied, never explained", band: "Mythic" },
 ];
 
 const HABITS: TraitPool = [
