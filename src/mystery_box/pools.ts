@@ -240,7 +240,7 @@ const COFFEE_RITUALS: TraitPool = [
   { value: "instant coffee from the kitchen jar",                          band: "Common" },
   { value: "a flat white from the place downstairs",                       band: "Common" },
   { value: "Earl Grey, no milk",                                           band: "Common" },
-  { value: "a can of Diet Coke at 9 a.m.",                                 band: "Common" },
+  { value: "a can of Diet Coke at 9am sharp",                              band: "Common" },
   { value: "green tea, steeped too long",                                  band: "Common" },
   { value: "a builder's brew in a chipped mug",                            band: "Common" },
   { value: "hot water with a slice of lemon",                              band: "Common" },
