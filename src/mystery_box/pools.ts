@@ -131,12 +131,60 @@ const DESK_SETUPS: TraitPool = [
 ];
 
 const HABITS: TraitPool = [
+  // Common (21) — mundane office annoyances
   { value: "sends emails at midnight",                                       band: "Common" },
   { value: "replies-all to everything",                                      band: "Common" },
+  { value: "reads every email aloud before sending",                         band: "Common" },
+  { value: "eats crisps at their desk throughout every meeting",             band: "Common" },
+  { value: "prints every document 'just in case'",                           band: "Common" },
+  { value: "chews ice loudly at the standing desk",                          band: "Common" },
+  { value: "leaves voicemails instead of sending a message",                 band: "Common" },
+  { value: "clears their throat before every sentence",                      band: "Common" },
+  { value: "schedules meetings to discuss upcoming meetings",                band: "Common" },
+  { value: "takes the stairs and mentions it each time",                     band: "Common" },
+  { value: "forgets their password every Monday morning",                    band: "Common" },
+  { value: "brings a banana to every meeting and never eats it",             band: "Common" },
+  { value: "refuses to use the shared calendar",                             band: "Common" },
+  { value: "sighs audibly before answering any question",                    band: "Common" },
+  { value: "arrives exactly nine minutes early, every single day",           band: "Common" },
+  { value: "keeps a jumper on the back of their chair year-round",           band: "Common" },
+  { value: "asks if a meeting 'could have been an email' during the meeting", band: "Common" },
+  { value: "types with two fingers and surprising speed",                    band: "Common" },
+  { value: "rearranges the dishwasher after everyone else has loaded it",    band: "Common" },
+  { value: "reuses the same tea bag across three separate mugs",             band: "Common" },
+  { value: "refers to the CEO by their first name in every sentence",        band: "Common" },
+
+  // Uncommon (12) — mildly unprofessional
   { value: "microwaves fish despite three separate HR warnings",             band: "Uncommon" },
+  { value: "takes loud personal calls in the open-plan office",              band: "Uncommon" },
+  { value: "forwards motivational quotes to the whole team on Mondays",      band: "Uncommon" },
+  { value: "never wears the ID badge and argues with reception daily",       band: "Uncommon" },
+  { value: "leaves passive-aggressive sticky notes on the communal fridge",  band: "Uncommon" },
+  { value: "books the largest meeting room for solo calls",                  band: "Uncommon" },
+  { value: "clips their fingernails at the desk on Wednesday afternoons",    band: "Uncommon" },
+  { value: "keeps the out-of-office autoresponder on while sitting at the desk", band: "Uncommon" },
+  { value: "corrects other people's grammar in the team chat",               band: "Uncommon" },
+  { value: "brings a full home-cooked curry to eat at the hot desk",         band: "Uncommon" },
+  { value: "hot-desks in a different chair every day to avoid being found",  band: "Uncommon" },
+  { value: "replies to Slack threads from six weeks ago with no context",    band: "Uncommon" },
+
+  // Rare (7) — fully unprofessional
   { value: "hums Enya during code reviews",                                  band: "Rare" },
+  { value: "keeps a whiteboard nobody else is allowed to clean",             band: "Rare" },
+  { value: "names each office plant and cc's them in client emails",         band: "Rare" },
+  { value: "conducts one-on-ones exclusively while walking backwards",       band: "Rare" },
+  { value: "ends every message with a Latin phrase they cannot translate",   band: "Rare" },
+  { value: "brings a portable ring light to in-person meetings",             band: "Rare" },
+  { value: "keeps a locked filing cabinet no one has seen the key to",       band: "Rare" },
+
+  // Legendary (3) — office folklore territory
   { value: "kept a folding cot in a server cabinet during a year-long migration", band: "Legendary" },
+  { value: "once mediated a two-year feud between Finance and Procurement with a single PowerPoint slide", band: "Legendary" },
+  { value: "has been quoted in three separate all-hands meetings without ever being present", band: "Legendary" },
+
+  // Mythic (2) — paranormal
   { value: "has not spoken in a meeting since 2019 and still gets bonuses",  band: "Mythic" },
+  { value: "appears in every team photo going back to 2004, including ones taken before they were hired", band: "Mythic" },
 ];
 
 const COFFEE_RITUALS: TraitPool = [
