@@ -49,7 +49,7 @@ const NAMES: TraitPool = [
   { value: "Brenda from Accounts", band: "Rare" },
   { value: "Dave who used to be a contractor", band: "Rare" },
   { value: "Linda on the third floor", band: "Rare" },
-  { value: "the other Steve", band: "Rare" },
+  { value: "The Other Steve", band: "Rare" },
   { value: "Nick from Procurement (not that Nick)", band: "Rare" },
   { value: "Tall Paul", band: "Rare" },
   { value: "Susan from the London office", band: "Rare" },
@@ -223,7 +223,7 @@ const HABITS: TraitPool = [
 
   // Legendary (3) — office folklore territory
   { value: "kept a folding cot in a server cabinet during a year-long migration", band: "Legendary" },
-  { value: "once mediated a two-year feud between Finance and Procurement with a single PowerPoint slide", band: "Legendary" },
+  { value: "still brings up the two-year feud they ended with a single PowerPoint slide", band: "Legendary" },
   { value: "has been quoted in three separate all-hands meetings without ever being present", band: "Legendary" },
 
   // Mythic (2) — paranormal
@@ -379,7 +379,7 @@ const PASSIVE_AGGRESSIVE: TraitPool = [
   // Legendary (3) — weapons-grade
   { value: "As discussed (it was not discussed)",          band: "Legendary" },
   { value: "Per our previous conversation (there was no previous conversation)", band: "Legendary" },
-  { value: "Let me know your thoughts by EOD (it is currently 4:47 p.m.)", band: "Legendary" },
+  { value: "Let me know your thoughts by EOD (it is currently 4:47 in the afternoon)", band: "Legendary" },
   // Mythic (2) — behaviour-as-phrase
   { value: "Adding a +1 with no further comment",          band: "Mythic" },
   { value: "Responding only with a calendar invite",       band: "Mythic" },
@@ -509,7 +509,7 @@ const PHYSICAL_MATERIAL: TraitPool = [
   { value: "a name badge from a 2011 team-building retreat",        band: "Uncommon" },
   { value: "the exact outfit from their LinkedIn profile, 1999",    band: "Rare" },
   { value: "a suit that fit perfectly seventeen years ago",         band: "Rare" },
-  { value: "a signet ring engraved with a company that no longer exists", band: "Rare" },
+  { value: "a signet ring engraved with a logo nobody recognises", band: "Rare" },
   { value: "a briefcase that has not been opened this decade",      band: "Rare" },
   { value: "a tie pinned with what may be a live firefly",          band: "Legendary" },
   { value: "a single cufflink rumoured to predate the building",    band: "Legendary" },

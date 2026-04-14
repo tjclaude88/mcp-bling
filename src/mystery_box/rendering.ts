@@ -62,7 +62,7 @@ export const PARAGRAPH_TEMPLATES: readonly string[] = [
   "Subject: {name}. Function: {job_title}. Build: {height}. Wears {material}. Carries {accessory}. Expression: {expression}. Habit: {habit}. Drinks {coffee_ritual}. Email sign-off: \"{passive_aggressive}\".",
   "Meet {name} — your new {job_title}. {name} sits behind {desk_setup}. Most often, {name} {habit}. They drink {coffee_ritual}. In meetings they are {meeting_energy}.",
   "{name}, {job_title}. Recognise them by {accessory} and {material}. Their build is {height}; their expression, {expression}. Notable habit: {habit}.",
-  "Personnel record — {name}, {job_title}. Distinguishing features: {material}; {accessory}; expression of {expression}. Notable behaviours: {habit}; {coffee_ritual}; {meeting_energy}.",
+  "Personnel record — {name}, {job_title}. Distinguishing features: {material}; {accessory}; expression: {expression}. Notable behaviours: {habit}; {coffee_ritual}; {meeting_energy}.",
   "Day one report. {name}, your new {job_title}, has already, somehow, broken something. Their desk: {desk_setup}. Their drink: {coffee_ritual}. Sign-off of choice: \"{passive_aggressive}\".",
   "Introducing {name}, the office's {job_title}. Wears {material}. Carries {accessory}. Notable habit: {habit}. Drinks {coffee_ritual}. Catchphrase: \"{passive_aggressive}\".",
   "Subject: {name}. Title: {job_title}. Stature: {height}. Demeanour: {expression}. Notable behaviour: {habit}. In meetings: {meeting_energy}.",
