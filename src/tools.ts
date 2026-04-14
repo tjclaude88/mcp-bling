@@ -2,10 +2,38 @@
 // MCP tool definitions and platform theme generation.
 // Theme helpers are exported so tests can call them directly.
 
-import type { BlingIdentity } from "./types.js";
+import type { BlingIdentity, RollOutput } from "./types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { loadIdentity } from "./identity.js";
+import { rollIdentity, type Rng } from "./mystery_box.js";
+
+/**
+ * The most-recent roll, kept in memory for `save_last_roll`.
+ * Note: single-process / single-client by design — this is fine for the
+ * MVP because the MCP server runs as a one-stdio-pair-per-client process.
+ */
+let lastRoll: RollOutput | null = null;
+
+/**
+ * Handler extracted so it can be unit-tested without spinning up a server.
+ * Side effect: stores the roll in `lastRoll` for `save_last_roll`.
+ * Returns BOTH `content` (text-shaped, for backwards compat) AND
+ * `structuredContent` (the parsed object, used by SDK-aware clients).
+ *
+ * @param rng - optional deterministic RNG for tests; omit in production.
+ */
+export async function rollIdentityHandler(rng?: Rng): Promise<{
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent: RollOutput;
+}> {
+  const out = rng ? rollIdentity(rng) : rollIdentity();
+  lastRoll = out;
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(out, null, 2) }],
+    structuredContent: out,
+  };
+}
 
 /**
  * Convert a hex colour string (e.g. "#FF6B35") to a 24-bit ANSI
@@ -142,6 +170,55 @@ export function registerTools(server: McpServer, blingPath: string): void {
 
       return {
         content: [{ type: "text" as const, text: JSON.stringify(theme, null, 2) }],
+      };
+    },
+  );
+
+  // Tool 3: roll_identity
+  // Generates a fresh random bot identity from the Mystery Box.
+  // Modifies internal state (the in-memory lastRoll cache) so it is not
+  // readOnly. Does not touch the filesystem or network.
+  const rollIdentityOutputSchema = {
+    identity: z.object({}).passthrough(),
+    rarity: z.object({
+      score: z.number(),
+      tier: z.string(),
+      percentile: z.number(),
+      per_trait: z.array(z.object({
+        category: z.string(),
+        value: z.string(),
+        band: z.string(),
+      })).nullable(),
+    }),
+    paragraph: z.string(),
+    framed: z.string(),
+    lore: z.string().nullable(),
+  };
+
+  server.registerTool(
+    "roll_identity",
+    {
+      title: "Roll a WOW Identity",
+      description:
+        "WOW — Weird Office Workers. Roll a fresh random bot identity: a quirky office-worker character with a rarity score and a screenshot-ready share card. Stores the roll for save_last_roll and get_rarity_report.",
+      inputSchema: {},
+      outputSchema: rollIdentityOutputSchema,
+      annotations: {
+        readOnlyHint: false,        // mutates lastRoll
+        destructiveHint: false,     // no filesystem / external side effects
+        idempotentHint: false,      // each call produces a fresh random roll
+        openWorldHint: false,       // no external systems
+      },
+    },
+    // Wrapper: MCP passes (args, extra) to the callback, but the handler
+    // takes an optional `rng` for tests. Ignore MCP's args in production.
+    // Cast structuredContent because the SDK's callback signature wants an
+    // index-signature type, and RollOutput has known concrete fields.
+    async () => {
+      const out = await rollIdentityHandler();
+      return {
+        content: out.content,
+        structuredContent: out.structuredContent as unknown as { [k: string]: unknown },
       };
     },
   );

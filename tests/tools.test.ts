@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { hexToAnsi, generateThemeForPlatform } from "../src/tools.js";
+import { hexToAnsi, generateThemeForPlatform, rollIdentityHandler } from "../src/tools.js";
 import type { BlingIdentity } from "../src/types.js";
 
 // A minimal identity for testing theme generation
@@ -79,5 +79,18 @@ describe("generateThemeForPlatform", () => {
     expect(result).toHaveProperty("requested", "some_new_platform");
     expect(result).toHaveProperty("primary_color", "#FF6B35");
     expect(result).toHaveProperty("message");
+  });
+});
+
+describe("rollIdentityHandler", () => {
+  it("returns a JSON string with identity, rarity, paragraph, and framed", async () => {
+    const result = await rollIdentityHandler();
+    const text = result.content[0]!.text;
+    const parsed = JSON.parse(text);
+    expect(parsed.identity).toBeDefined();
+    expect(parsed.rarity).toBeDefined();
+    expect(parsed.paragraph).toBeDefined();
+    expect(parsed.framed).toBeDefined();
+    expect(typeof parsed.identity.name).toBe("string");
   });
 });
