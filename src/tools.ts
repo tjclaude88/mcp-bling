@@ -84,6 +84,35 @@ export async function saveLastRollHandler(targetPath: string): Promise<{
   };
 }
 
+/**
+ * Return the most-recent roll's framed share card (header + paragraph + footer)
+ * wrapped in JSON, for consistency with the other tools that all return
+ * JSON. Clients pull `.report` out of the parsed object and display it.
+ *
+ * Errors with isError: true if no roll has happened this session.
+ */
+export async function getRarityReportHandler(): Promise<{
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+}> {
+  if (lastRoll === null) {
+    const errorBody = {
+      error: "No roll has happened this session. Call roll_identity first.",
+    };
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(errorBody) }],
+      structuredContent: errorBody,
+      isError: true,
+    };
+  }
+  const successBody = { report: lastRoll.framed };
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(successBody) }],
+    structuredContent: successBody,
+  };
+}
+
 /** Test-only — clears module state between tests. Do not call from production. */
 export function _resetLastRollForTests(): void {
   lastRoll = null;
@@ -303,5 +332,31 @@ export function registerTools(server: McpServer, blingPath: string): void {
       },
     },
     () => saveLastRollHandler(blingPath),
+  );
+
+  // Tool 5: get_rarity_report
+  // Returns the formatted share card (lore header, paragraph, lore footer)
+  // for the most-recent roll. Pure read of in-memory state.
+  const rarityReportOutputSchema = {
+    report: z.string().optional(),
+    error: z.string().optional(),
+  };
+
+  server.registerTool(
+    "get_rarity_report",
+    {
+      title: "Get WOW Rarity Report",
+      description:
+        "Return the formatted share card (lore header, paragraph, lore footer) for the most-recent WOW roll. The report is plain text designed to be screenshotted directly. Errors if no roll has happened this session.",
+      inputSchema: {},
+      outputSchema: rarityReportOutputSchema,
+      annotations: {
+        readOnlyHint: true,         // pure read of lastRoll
+        destructiveHint: false,
+        idempotentHint: true,       // multiple calls return the same report
+        openWorldHint: false,       // no external systems
+      },
+    },
+    getRarityReportHandler,
   );
 }

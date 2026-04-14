@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { hexToAnsi, generateThemeForPlatform, rollIdentityHandler, saveLastRollHandler, _resetLastRollForTests } from "../src/tools.js";
+import { hexToAnsi, generateThemeForPlatform, rollIdentityHandler, saveLastRollHandler, getRarityReportHandler, _resetLastRollForTests } from "../src/tools.js";
 import type { BlingIdentity } from "../src/types.js";
 import { writeFile, unlink, readFile, stat } from "node:fs/promises";
 
@@ -149,5 +149,26 @@ describe("saveLastRollHandler", () => {
     expect(parsed.ok).toBe(true);
     expect(parsed.backup).toBeNull();
     await expect(stat(backupPath)).rejects.toThrow();
+  });
+});
+
+describe("getRarityReportHandler", () => {
+  it("returns the framed share card inside JSON after a roll", async () => {
+    _resetLastRollForTests();
+    await rollIdentityHandler();
+    const result = await getRarityReportHandler();
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(typeof parsed.report).toBe("string");
+    expect(parsed.report).toContain("HOMUNCULUS CORPUS");
+    expect(parsed.report).toContain("RELATABILITY CORPUS v3.1");
+  });
+
+  it("returns an error when no roll has happened this session", async () => {
+    _resetLastRollForTests();
+    const result = await getRarityReportHandler();
+    const text = result.content[0]!.text;
+    const parsed = JSON.parse(text);
+    expect(parsed.error).toBeDefined();
+    expect(result.isError).toBe(true);
   });
 });
