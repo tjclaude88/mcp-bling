@@ -280,12 +280,56 @@ const COFFEE_RITUALS: TraitPool = [
 ];
 
 const MEETING_ENERGY: TraitPool = [
-  { value: "always on mute",                                            band: "Common" },
-  { value: "always 4 minutes late, always with a reason",               band: "Common" },
-  { value: "interrupts with 'let me just jump in here'",                band: "Uncommon" },
-  { value: "monologues for 47 uninterrupted minutes",                   band: "Rare" },
-  { value: "books 7 a.m. meetings 'to respect everyone's focus time'",  band: "Legendary" },
-  { value: "speaks only in acronyms nobody else recognises",            band: "Mythic" },
+  // Common (21)
+  { value: "always on mute",                                                            band: "Common" },
+  { value: "always 4 minutes late, always with a reason",                               band: "Common" },
+  { value: "the one who unmutes to breathe, then mutes again",                          band: "Common" },
+  { value: "dead silent with camera off",                                               band: "Common" },
+  { value: "always eating something just off-screen",                                   band: "Common" },
+  { value: "the one nodding slowly, saying nothing",                                    band: "Common" },
+  { value: "chronically typing visibly during 'quick questions'",                       band: "Common" },
+  { value: "the kind to leave exactly on the hour, mid-sentence",                       band: "Common" },
+  { value: "always in a slightly darker room than everyone else",                       band: "Common" },
+  { value: "the one whose dog appears halfway through",                                 band: "Common" },
+  { value: "joining from the car, obviously",                                           band: "Common" },
+  { value: "always sharing the wrong screen first",                                     band: "Common" },
+  { value: "the one who says 'can you hear me?' three times",                           band: "Common" },
+  { value: "the sort to reply 'sounds good' to everything",                             band: "Common" },
+  { value: "always in the same hoodie, regardless of day",                              band: "Common" },
+  { value: "the one fiddling with earbuds the whole call",                              band: "Common" },
+  { value: "always the first to say 'I have a hard stop at the top of the hour'",      band: "Common" },
+  { value: "the kind to keep a notebook open but never write in it",                    band: "Common" },
+  { value: "the one who waves goodbye even on audio-only calls",                        band: "Common" },
+  { value: "always two tabs deep in something unrelated",                               band: "Common" },
+  { value: "the sort to ask 'sorry, can you repeat that?' every ten minutes",           band: "Common" },
+  // Uncommon (12) — first entry is a rewrite of the legacy "interrupts with ..."
+  { value: "the kind to interrupt with 'let me just jump in here'",                     band: "Uncommon" },
+  { value: "the designated note-taker, unasked",                                        band: "Uncommon" },
+  { value: "the chronic camera-positioner, never quite centred",                        band: "Uncommon" },
+  { value: "the one who arrives exactly on time with a loaded agenda",                  band: "Uncommon" },
+  { value: "the sort to pre-send a deck nobody opens",                                  band: "Uncommon" },
+  { value: "prone to reading the slide aloud, word for word",                           band: "Uncommon" },
+  { value: "the kind to ask 'can we park that?' without parking anything",              band: "Uncommon" },
+  { value: "always the one with a hot take in the last 90 seconds",                     band: "Uncommon" },
+  { value: "the one drinking from a mug that says something alarming",                  band: "Uncommon" },
+  { value: "chronically at the wrong end of a bad ring light",                          band: "Uncommon" },
+  { value: "the sort to volunteer other people for action items",                       band: "Uncommon" },
+  { value: "the one who 'just wanted to pop in for a second' and stays the whole hour", band: "Uncommon" },
+  // Rare (7) — first entry is a rewrite of the legacy "monologues for 47..."
+  { value: "prone to 47-minute uninterrupted monologues",                               band: "Rare" },
+  { value: "the one who says 'let's take a step back' every eight minutes",             band: "Rare" },
+  { value: "chronically in a different meeting room than advertised",                   band: "Rare" },
+  { value: "the sort to schedule a pre-meeting for the meeting",                        band: "Rare" },
+  { value: "known for ending calls with 'well, this has been generative'",              band: "Rare" },
+  { value: "the kind to open with 'I'll be brief' and never be brief",                  band: "Rare" },
+  { value: "the one who brings printouts to a video call, somehow",                     band: "Rare" },
+  // Legendary (3) — first entry is a rewrite of the legacy "books 7 a.m. ..."
+  { value: "the sort who books 7 a.m. meetings 'to respect everyone's focus time'",     band: "Legendary" },
+  { value: "famous for the 'quick sync' that lasts 90 minutes",                         band: "Legendary" },
+  { value: "the one whose calendar invites include a mandatory reading list",           band: "Legendary" },
+  // Mythic (2) — first entry is a rewrite of the legacy "speaks only in acronyms..."
+  { value: "only ever heard speaking in acronyms nobody else recognises",               band: "Mythic" },
+  { value: "known to have attended a meeting that later turned out not to exist",       band: "Mythic" },
 ];
 
 const PASSIVE_AGGRESSIVE: TraitPool = [
