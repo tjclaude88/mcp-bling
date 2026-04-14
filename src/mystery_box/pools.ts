@@ -8,13 +8,60 @@
 import type { TraitPool } from "../types.js";
 
 const NAMES: TraitPool = [
+  // Common (21) — ordinary first names, deadpan realism
   { value: "Steve",   band: "Common" },
   { value: "Karen",   band: "Common" },
+  { value: "Dave",    band: "Common" },
+  { value: "Linda",   band: "Common" },
+  { value: "Keith",   band: "Common" },
+  { value: "Susan",   band: "Common" },
+  { value: "Colin",   band: "Common" },
+  { value: "Barbara", band: "Common" },
+  { value: "Gary",    band: "Common" },
+  { value: "Janet",   band: "Common" },
+  { value: "Trevor",  band: "Common" },
+  { value: "Pauline", band: "Common" },
+  { value: "Nigel",   band: "Common" },
+  { value: "Margaret", band: "Common" },
+  { value: "Ian",     band: "Common" },
+  { value: "Sheila",  band: "Common" },
+  { value: "Graham",  band: "Common" },
+  { value: "Doreen",  band: "Common" },
+  { value: "Martin",  band: "Common" },
+  { value: "Carol",   band: "Common" },
+  { value: "Brian",   band: "Common" },
+
+  // Uncommon (12) — distinctive but real-world
   { value: "Derek",   band: "Uncommon" },
   { value: "Priya",   band: "Uncommon" },
+  { value: "Yusuf",   band: "Uncommon" },
+  { value: "Aoife",   band: "Uncommon" },
+  { value: "Hans",    band: "Uncommon" },
+  { value: "Siobhan", band: "Uncommon" },
+  { value: "Kenji",   band: "Uncommon" },
+  { value: "Ingrid",  band: "Uncommon" },
+  { value: "Rajesh",  band: "Uncommon" },
+  { value: "Małgorzata", band: "Uncommon" },
+  { value: "Tomasz",  band: "Uncommon" },
+  { value: "Niamh",   band: "Uncommon" },
+
+  // Rare (7) — first name + office-shorthand qualifier
   { value: "Brenda from Accounts", band: "Rare" },
+  { value: "Dave who used to be a contractor", band: "Rare" },
+  { value: "Linda on the third floor", band: "Rare" },
+  { value: "the other Steve", band: "Rare" },
+  { value: "Nick from Procurement (not that Nick)", band: "Rare" },
+  { value: "Tall Paul", band: "Rare" },
+  { value: "Susan from the London office", band: "Rare" },
+
+  // Legendary (3) — memorable one-word or titled names
   { value: "Günther", band: "Legendary" },
+  { value: "Mx. Featherington", band: "Legendary" },
+  { value: "Ambrose", band: "Legendary" },
+
+  // Mythic (2) — names that are statements about the person
   { value: "The One Who Doesn't Speak", band: "Mythic" },
+  { value: "She Who Approves Expense Reports", band: "Mythic" },
 ];
 
 const JOB_TITLES: TraitPool = [
