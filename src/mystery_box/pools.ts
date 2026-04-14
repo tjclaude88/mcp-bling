@@ -65,12 +65,60 @@ const NAMES: TraitPool = [
 ];
 
 const JOB_TITLES: TraitPool = [
+  // Common (21) — realistic job titles you'd see on a real org chart
   { value: "Senior Developer",          band: "Common" },
   { value: "QA Lead",                   band: "Common" },
+  { value: "Account Executive",         band: "Common" },
+  { value: "IT Support Technician",     band: "Common" },
+  { value: "Office Manager",            band: "Common" },
+  { value: "Junior Analyst",            band: "Common" },
+  { value: "Operations Coordinator",    band: "Common" },
+  { value: "Project Manager",           band: "Common" },
+  { value: "Marketing Associate",       band: "Common" },
+  { value: "Business Analyst",          band: "Common" },
+  { value: "HR Generalist",             band: "Common" },
+  { value: "Finance Manager",           band: "Common" },
+  { value: "Executive Assistant",       band: "Common" },
+  { value: "Sales Representative",      band: "Common" },
+  { value: "Product Designer",          band: "Common" },
+  { value: "Data Engineer",             band: "Common" },
+  { value: "Customer Success Manager",  band: "Common" },
+  { value: "Technical Writer",          band: "Common" },
+  { value: "Procurement Officer",       band: "Common" },
+  { value: "Facilities Coordinator",    band: "Common" },
+  { value: "Payroll Administrator",     band: "Common" },
+
+  // Uncommon (12) — real but slightly baroque corporate titles
   { value: "Regional Manager",          band: "Uncommon" },
+  { value: "Senior Customer Success Enablement Specialist", band: "Uncommon" },
+  { value: "Head of Stakeholder Relations", band: "Uncommon" },
+  { value: "Principal Product Evangelist", band: "Uncommon" },
+  { value: "Director of Strategic Initiatives", band: "Uncommon" },
+  { value: "VP of People Operations",   band: "Uncommon" },
+  { value: "Chief of Staff to the COO", band: "Uncommon" },
+  { value: "Lead Synergy Architect",    band: "Uncommon" },
+  { value: "Global Head of Learning and Development", band: "Uncommon" },
+  { value: "Senior Manager, Digital Transformation", band: "Uncommon" },
+  { value: "Associate Director of Thought Leadership", band: "Uncommon" },
+  { value: "Head of Paid Search",       band: "Uncommon" },
+
+  // Rare (7) — dry-funny titles that could plausibly exist in a dysfunctional office
   { value: "ASCII Comptroller",         band: "Rare" },
+  { value: "Head of Mug Allocation",    band: "Rare" },
+  { value: "Deputy Director of Coffee Machine Relations", band: "Rare" },
+  { value: "Chair of the Fridge Cleaning Rota", band: "Rare" },
+  { value: "Kitchen Rota Compliance Officer", band: "Rare" },
+  { value: "Interim Custodian of the Kitchen WhatsApp", band: "Rare" },
+  { value: "Vice-Chair of the Birthday Card Subcommittee", band: "Rare" },
+
+  // Legendary (3) — invented Michael-Scott-style titles
   { value: "Wizard of Light Bulb Moments", band: "Legendary" },
+  { value: "Ambassador of Agile",       band: "Legendary" },
+  { value: "Grand Architect of the Shared Drive", band: "Legendary" },
+
+  // Mythic (2) — cosmic corporate titles with religious/mythic scale
   { value: "Galactic Viceroy of Research Excellence", band: "Mythic" },
+  { value: "Eternal Custodian of the Quarterly Roadmap", band: "Mythic" },
 ];
 
 const DESK_SETUPS: TraitPool = [
