@@ -334,7 +334,7 @@ EOF
 **Examples that break:**
 - ✗ "speaks only in acronyms" → "they are speaks only in acronyms" ungrammatical
 
-⚠️ **Existing entries `"interrupts with..."`, `"monologues for..."`, `"books..."`, `"speaks only in..."` are technically ungrammatical after "they are"** — preserved as legacy. New entries should be stricter: write them as states/descriptors, not verbs.
+⚠️ **Existing entries `"interrupts with..."`, `"monologues for..."`, `"books..."`, `"speaks only in..."` are ungrammatical after "they are"** — this task REWRITES them (see Step 1a below) as well as adding 39 new entries.
 
 **Creative brief:**
 - **Common** — universal meeting-goer archetypes (stated as state): "always on mute" ✓.
@@ -343,8 +343,21 @@ EOF
 - **Legendary** — infamous: "famous for the 'quick sync' that lasts 90 minutes".
 - **Mythic** — impossible: "physically present in two meetings at once".
 
+- [ ] **Step 1a: Rewrite the 4 ungrammatical legacy entries**
+
+Rewrite each of these so it reads naturally after both "In meetings: " AND "In meetings they are ". Preserve the spirit and band of each entry.
+
+| Original (ungrammatical after "they are") | Band | Rewrite target |
+|---|---|---|
+| `"interrupts with 'let me just jump in here'"` | Uncommon | e.g. `"always the one to jump in with 'let me just jump in here'"` |
+| `"monologues for 47 uninterrupted minutes"` | Rare | e.g. `"prone to 47-minute uninterrupted monologues"` |
+| `"books 7 a.m. meetings 'to respect everyone's focus time'"` | Legendary | e.g. `"the sort who books 7 a.m. meetings 'to respect everyone's focus time'"` |
+| `"speaks only in acronyms nobody else recognises"` | Mythic | e.g. `"only ever heard speaking in acronyms nobody else recognises"` |
+
+Don't use the examples verbatim unless they land well — feel free to craft your own as long as they pass the "they are ____" test.
+
 - [ ] **Step 1: Draft 39 new entries** — write as descriptors/states, not verbs. Mentally test in "they are ____".
-- [ ] **Step 2: Edit `pools.ts`** — replace `MEETING_ENERGY` constant.
+- [ ] **Step 2: Edit `pools.ts`** — replace `MEETING_ENERGY` constant with all 45 entries (2 unchanged legacy commons + 4 rewritten legacy entries + 39 new).
 - [ ] **Step 3: Verify build** — `npx tsc --noEmit`.
 - [ ] **Step 4: Verify count** — `awk '/^const MEETING_ENERGY/,/^];/' src/mystery_box/pools.ts | grep -c 'value:'` → `45`.
 - [ ] **Step 5: Check for duplicates** — `awk '/^const MEETING_ENERGY/,/^];/' src/mystery_box/pools.ts | grep -oE 'value: *"[^"]*"' | sort | uniq -d` → no output.
@@ -354,10 +367,11 @@ EOF
 ```bash
 git add src/mystery_box/pools.ts
 git commit -m "$(cat <<'EOF'
-feat(pools): expand MEETING_ENERGY pool to 45 entries
+feat(pools): expand MEETING_ENERGY to 45 + fix legacy grammar
 
-New entries written as descriptor phrases so they read naturally
-after "they are" in paragraph templates.
+- Rewrites 4 existing entries (interrupts/monologues/books/speaks)
+  that were ungrammatical after "In meetings they are"
+- Adds 39 new entries, all written as descriptor phrases
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 EOF
@@ -811,3 +825,4 @@ These are tracked in the spec §8 and should be captured as separate follow-up p
 - Mulberry32 stability snapshot test
 - Revisit spec §1.1 lore framing
 - Possibly re-tier existing entries if some feel mis-banded
+- **Grammar-aware pool linter** — A test that renders every pool entry × every template context it appears in, and flags any combination that produces ungrammatical output. Would retroactively catch cases like the `physical_height: "looms"` issue in the "Their build is looms" template, and prevent future regressions as pools grow. Scope: new test file + optional dev script. Added as a result of review of this plan (2026-04-14).
