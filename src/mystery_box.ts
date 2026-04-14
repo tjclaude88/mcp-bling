@@ -22,7 +22,7 @@ import { pickNamedSubject } from "./mystery_box/named.js";
 // point for tests and future MCP tool code.
 export { mulberry32, BAND_WEIGHTS, pickWeighted, type Rng } from "./mystery_box/rng.js";
 export { POOLS, type CategoryKey } from "./mystery_box/pools.js";
-export { rarityScore, tierFromScore } from "./mystery_box/scoring.js";
+export { rarityScore, tierFromScore, scoreToPercentile } from "./mystery_box/scoring.js";
 export {
   PARAGRAPH_TEMPLATES,
   renderParagraph,

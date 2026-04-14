@@ -498,16 +498,25 @@ describe("rollIdentity — distribution (10k rolls)", () => {
     // Spec §5.4 targets: 50 / 30 / 14 / 5 / 1 (percent).
     // Calibration lives in src/mystery_box/scoring.ts — TIER_THRESHOLDS
     // and scoreToPercentile are tuned against this exact seed and pool
-    // composition. Tolerances are loose on purpose (starter pools);
-    // tighten once pools are expanded to the spec's 30–60 entries per
-    // category.
+    // composition. Tolerances are ±10pp around each target — narrow
+    // enough to catch calibration drift, wide enough to absorb the
+    // Named Subject blip (+0.5pp to HR Warned) and sampling noise at
+    // N=10k. Tighten further once pools are expanded to 30–60 entries
+    // per category.
     const pct = (k: string) => (tally[k] ?? 0) / N * 100;
 
-    expect(pct("Filing Clerk")).toBeGreaterThan(20);      // wide lower bound
-    expect(pct("HR Warned Us About")).toBeLessThan(15);   // wide upper bound
+    // Per-tier bounds (±10pp around spec target):
+    expect(pct("Filing Clerk")).toBeGreaterThan(40);
+    expect(pct("Filing Clerk")).toBeLessThan(60);
+    expect(pct("Team Lead")).toBeGreaterThan(20);
+    expect(pct("Team Lead")).toBeLessThan(40);
+    expect(pct("Middle Manager")).toBeGreaterThan(4);
+    expect(pct("Middle Manager")).toBeLessThan(24);
+    expect(pct("C-Suite")).toBeLessThan(15);
+    expect(pct("HR Warned Us About")).toBeLessThan(6);
 
-    // Most valuable assertion: every tier is reachable. This is the
-    // regression guard for the "unreachable tier" class of bug.
+    // Regression guard: every tier must be reachable. Catches the
+    // "unreachable tier" class of bug (fixed earlier in 3b973ef).
     const tiers = ["Filing Clerk", "Team Lead", "Middle Manager", "C-Suite", "HR Warned Us About"];
     for (const t of tiers) {
       expect(tally[t] ?? 0).toBeGreaterThan(0);
