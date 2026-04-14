@@ -183,3 +183,21 @@ describe("getRarityReportHandler", () => {
     expect(result.isError).toBe(true);
   });
 });
+
+describe("existing tools — isError compliance", () => {
+  it("get_identity error response sets isError: true", async () => {
+    const { getIdentityHandler } = await import("../src/tools.js");
+    const result = await getIdentityHandler("tests/fixtures/_does_not_exist.json");
+    expect(result.isError).toBe(true);
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(parsed.error).toBeDefined();
+  });
+
+  it("get_theme_for_platform error response sets isError: true", async () => {
+    const { getThemeForPlatformHandler } = await import("../src/tools.js");
+    const result = await getThemeForPlatformHandler("tests/fixtures/_does_not_exist.json", "terminal");
+    expect(result.isError).toBe(true);
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(parsed.error).toBeDefined();
+  });
+});

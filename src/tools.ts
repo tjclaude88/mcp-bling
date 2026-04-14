@@ -140,6 +140,58 @@ export function _resetLastRollForTests(): void {
 }
 
 /**
+ * Handler extracted so it can be unit-tested without spinning up a server.
+ * Returns the configured bling.json's identity, with isError on load failure.
+ */
+export async function getIdentityHandler(blingPath: string): Promise<{
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+}> {
+  const result = await loadIdentity(blingPath);
+  if (!result.ok) {
+    const errorBody = { error: result.error };
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(errorBody) }],
+      structuredContent: errorBody,
+      isError: true,
+    };
+  }
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(result.identity, null, 2) }],
+    structuredContent: result.identity as unknown as Record<string, unknown>,
+  };
+}
+
+/**
+ * Handler extracted so it can be unit-tested without spinning up a server.
+ * Returns platform-specific theme styling, with isError on load failure.
+ */
+export async function getThemeForPlatformHandler(
+  blingPath: string,
+  platform: string,
+): Promise<{
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+}> {
+  const result = await loadIdentity(blingPath);
+  if (!result.ok) {
+    const errorBody = { error: result.error };
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(errorBody) }],
+      structuredContent: errorBody,
+      isError: true,
+    };
+  }
+  const theme = generateThemeForPlatform(result.identity, platform);
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(theme, null, 2) }],
+    structuredContent: theme,
+  };
+}
+
+/**
  * Convert a hex colour string (e.g. "#FF6B35") to a 24-bit ANSI
  * foreground colour escape code.
  *
@@ -230,52 +282,48 @@ export function generateThemeForPlatform(
  * @param blingPath - Path to the bling.json file to read
  */
 export function registerTools(server: McpServer, blingPath: string): void {
-  // Tool 1: get_identity
-  // Returns the bot's full identity from bling.json
-  server.tool(
+  // Tool 1: get_identity (modern registerTool, full MCP spec compliance)
+  // outputSchema is intentionally omitted — BlingIdentity is open-shape
+  // (user-defined fields allowed). The SDK leaves structuredContent
+  // as-is when no schema is declared.
+  server.registerTool(
     "get_identity",
-    "Get the bot's full identity — name, personality, quirks, appearance, and theme colours",
-    {},
-    async () => {
-      const result = await loadIdentity(blingPath);
-
-      if (!result.ok) {
-        return {
-          content: [{ type: "text" as const, text: JSON.stringify({ error: result.error }) }],
-        };
-      }
-
-      return {
-        content: [{ type: "text" as const, text: JSON.stringify(result.identity, null, 2) }],
-      };
+    {
+      title: "Get Bot Identity",
+      description:
+        "Get the bot's full identity from bling.json — name, personality, quirks, appearance, and theme colours. Returns the configured identity (hand-written or saved from a roll). Errors if bling.json is missing or invalid.",
+      inputSchema: {},
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,        // reads from disk
+      },
     },
+    () => getIdentityHandler(blingPath),
   );
 
-  // Tool 2: get_theme_for_platform
-  // Returns styling tailored to a specific platform
-  server.tool(
+  // Tool 2: get_theme_for_platform (modern registerTool)
+  // outputSchema is intentionally omitted — theme shape varies per platform.
+  server.registerTool(
     "get_theme_for_platform",
-    "Get platform-specific styling for the bot (terminal, web, slack, discord, or ide)",
     {
-      platform: z
-        .string()
-        .describe("Target platform: terminal, web, slack, discord, or ide"),
+      title: "Get Theme for Platform",
+      description:
+        "Get platform-specific styling for the bot. Supported platforms: terminal (returns ANSI escape codes), web (CSS variables), slack, discord, ide. Unknown platforms get the raw hex theme colours.",
+      inputSchema: {
+        platform: z
+          .string()
+          .describe("Target platform: terminal, web, slack, discord, or ide"),
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,        // reads from disk
+      },
     },
-    async ({ platform }) => {
-      const result = await loadIdentity(blingPath);
-
-      if (!result.ok) {
-        return {
-          content: [{ type: "text" as const, text: JSON.stringify({ error: result.error }) }],
-        };
-      }
-
-      const theme = generateThemeForPlatform(result.identity, platform);
-
-      return {
-        content: [{ type: "text" as const, text: JSON.stringify(theme, null, 2) }],
-      };
-    },
+    ({ platform }) => getThemeForPlatformHandler(blingPath, platform),
   );
 
   // Tool 3: roll_identity
