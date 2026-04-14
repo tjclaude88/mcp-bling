@@ -520,19 +520,37 @@ const PHYSICAL_MATERIAL: TraitPool = [
 const THEME_PRIMARY: TraitPool = [
   { value: "#9C6B3A", band: "Common" },     // office-tan
   { value: "#2D4A4F", band: "Common" },     // accountant teal
+  { value: "#8B7355", band: "Common" },     // manila-folder tan
+  { value: "#6B7B8C", band: "Common" },     // filing-cabinet blue-grey
+  { value: "#4A5043", band: "Common" },     // storage-closet olive
+  { value: "#736451", band: "Common" },     // cork-board brown
+  { value: "#3F5661", band: "Common" },     // cubicle slate
   { value: "#5C3D2E", band: "Uncommon" },   // boardroom mahogany
+  { value: "#4C2E2B", band: "Uncommon" },   // law-firm burgundy
+  { value: "#2B3A4A", band: "Uncommon" },   // deep-corporate navy-slate
+  { value: "#3D5A3D", band: "Uncommon" },   // forest-retreat green
   { value: "#A23E48", band: "Rare" },       // expense-report red
+  { value: "#E8742C", band: "Rare" },       // highlighter orange
   { value: "#1F4E79", band: "Legendary" },  // PowerPoint navy
   { value: "#FFCD3C", band: "Mythic" },     // overhead-projector yellow
 ];
 
 const THEME_ACCENT: TraitPool = [
-  { value: "#D9D9D9", band: "Common" },
-  { value: "#7F7F7F", band: "Common" },
-  { value: "#C0BFA8", band: "Uncommon" },
-  { value: "#6E8B3D", band: "Rare" },
-  { value: "#503D2E", band: "Legendary" },
-  { value: "#FF6F61", band: "Mythic" },
+  { value: "#D9D9D9", band: "Common" },     // printer-paper grey
+  { value: "#7F7F7F", band: "Common" },     // filing-cabinet grey
+  { value: "#E8E4D8", band: "Common" },     // conference-room beige
+  { value: "#A8A29A", band: "Common" },     // warm printer grey
+  { value: "#B5A884", band: "Common" },     // manila cream
+  { value: "#6B6B6B", band: "Common" },     // desk-phone charcoal
+  { value: "#C4BDB1", band: "Common" },     // taupe carpet-tile
+  { value: "#C0BFA8", band: "Uncommon" },   // aged-paper sage
+  { value: "#4A5D4A", band: "Uncommon" },   // slate forest
+  { value: "#5A3D4F", band: "Uncommon" },   // muted wine
+  { value: "#3E4E5C", band: "Uncommon" },   // deep slate
+  { value: "#6E8B3D", band: "Rare" },       // highlighter green
+  { value: "#F2D335", band: "Rare" },       // highlighter yellow
+  { value: "#503D2E", band: "Legendary" },  // executive walnut
+  { value: "#FF6F61", band: "Mythic" },     // motivational-poster coral
 ];
 
 /**
