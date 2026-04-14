@@ -105,15 +105,15 @@ const JOB_TITLES: TraitPool = [
   // Rare (7) — dry-funny titles that could plausibly exist in a dysfunctional office
   { value: "ASCII Comptroller",         band: "Rare" },
   { value: "Head of Mug Allocation",    band: "Rare" },
-  { value: "Deputy Director of Coffee Machine Relations", band: "Rare" },
   { value: "Chair of the Fridge Cleaning Rota", band: "Rare" },
-  { value: "Kitchen Rota Compliance Officer", band: "Rare" },
-  { value: "Interim Custodian of the Kitchen WhatsApp", band: "Rare" },
+  { value: "Warden of the Second-Floor Printer", band: "Rare" },
+  { value: "Chair of the Meeting Room Booking Committee", band: "Rare" },
+  { value: "Deputy Director of Badge Reissue", band: "Rare" },
   { value: "Vice-Chair of the Birthday Card Subcommittee", band: "Rare" },
 
   // Legendary (3) — invented Michael-Scott-style titles
   { value: "Wizard of Light Bulb Moments", band: "Legendary" },
-  { value: "Ambassador of Agile",       band: "Legendary" },
+  { value: "Chancellor of Nearly-Caught-Up Emails", band: "Legendary" },
   { value: "Grand Architect of the Shared Drive", band: "Legendary" },
 
   // Mythic (2) — cosmic corporate titles with religious/mythic scale
