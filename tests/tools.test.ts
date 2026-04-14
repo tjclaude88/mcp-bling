@@ -150,6 +150,17 @@ describe("saveLastRollHandler", () => {
     expect(parsed.backup).toBeNull();
     await expect(stat(backupPath)).rejects.toThrow();
   });
+
+  it("returns a structured error when the write fails", async () => {
+    await rollIdentityHandler();
+    // Parent directory does not exist — writeFile will throw ENOENT.
+    const badPath = "tests/fixtures/_nonexistent_dir_/_temp.json";
+    const result = await saveLastRollHandler(badPath);
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(parsed.error).toBeDefined();
+    expect(parsed.error).toMatch(/failed to save/i);
+    expect(result.isError).toBe(true);
+  });
 });
 
 describe("getRarityReportHandler", () => {

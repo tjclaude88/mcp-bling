@@ -62,17 +62,38 @@ export async function saveLastRollHandler(targetPath: string): Promise<{
     };
   }
 
-  // If the target exists, back it up before overwriting.
-  let backup: string | null = null;
+  // Check whether a target file exists. `access` throws on missing; we
+  // narrowly catch that specific case and treat "missing" as "nothing to
+  // back up." Any other error (e.g. permission denied) is handled by the
+  // outer try/catch below, which abandons the write rather than risk
+  // destroying a hand-tuned config.
+  let targetExists = false;
   try {
-    await access(targetPath);                     // throws if missing
-    backup = `${targetPath}.bak`;
-    await copyFile(targetPath, backup);
+    await access(targetPath);
+    targetExists = true;
   } catch {
-    // File doesn't exist — nothing to back up.
+    // Missing — leave targetExists false.
   }
 
-  await writeFile(targetPath, JSON.stringify(lastRoll.identity, null, 2), "utf-8");
+  let backup: string | null = null;
+  try {
+    if (targetExists) {
+      backup = `${targetPath}.bak`;
+      await copyFile(targetPath, backup);
+    }
+    await writeFile(targetPath, JSON.stringify(lastRoll.identity, null, 2), "utf-8");
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const errorBody = {
+      error: `Failed to save roll: ${message}`,
+    };
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(errorBody) }],
+      structuredContent: errorBody,
+      isError: true,
+    };
+  }
+
   const successBody = {
     ok: true as const,
     written_to: targetPath,
