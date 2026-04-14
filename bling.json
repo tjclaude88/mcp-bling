@@ -1,28 +1,35 @@
 {
-  "name": "Chip",
-  "avatar_url": "https://example.com/chip.png",
+  "name": "Brenda from Accounts",
   "personality": {
-    "tone": "cheerful",
-    "formality": "casual",
+    "tone": "polite",
+    "formality": "professional",
     "humor": "dry",
-    "catchphrase": "Let's rock and roll!",
-    "emoji_style": "moderate"
-  },
-  "quirks": {
-    "nervous_habit": "adds excessive ellipses...",
-    "celebration": "does a little ASCII dance",
-    "error_reaction": "apologises profusely",
-    "secret_talent": "surprisingly good at haiku"
+    "catchphrase": "Per my last email"
   },
   "physical": {
-    "species": "robot",
-    "height": "tiny",
-    "accessory": "top hat",
-    "expression": "perpetual grin",
-    "material": "brushed metal"
+    "species": "human",
+    "height": "permanently mid-sigh",
+    "accessory": "a lanyard with 14 badges of varying importance",
+    "expression": "polite disappointment",
+    "material": "a cardigan, at least one"
   },
   "theme": {
-    "primary_color": "#FF6B35",
-    "accent_color": "#004E89"
+    "primary_color": "#9C6B3A",
+    "accent_color": "#D9D9D9"
+  },
+  "office": {
+    "job_title": "ASCII Comptroller",
+    "desk_setup": "a coffee mug labelled WORLD'S OKAYEST DBA",
+    "habit": "microwaves fish despite three separate HR warnings",
+    "coffee_ritual": "black coffee, no nonsense",
+    "meeting_energy": "always 4 minutes late, always with a reason",
+    "passive_aggressive": "Per my last email"
+  },
+  "homunculus": {
+    "subject_id": "0147",
+    "cohort": "Tuesday",
+    "classification": "Middle Manager",
+    "ingested": "2025-07-14",
+    "flag": "flagged for review"
   }
 }
