@@ -8,7 +8,7 @@
 import type { TraitPool } from "../types.js";
 
 const NAMES: TraitPool = [
-  // Common (21) — ordinary first names, deadpan realism
+  // Common (21) — ordinary first names from any real office, deadpan realism
   { value: "Steve",   band: "Common" },
   { value: "Karen",   band: "Common" },
   { value: "Dave",    band: "Common" },
@@ -25,17 +25,17 @@ const NAMES: TraitPool = [
   { value: "Margaret", band: "Common" },
   { value: "Ian",     band: "Common" },
   { value: "Sheila",  band: "Common" },
-  { value: "Graham",  band: "Common" },
   { value: "Doreen",  band: "Common" },
-  { value: "Martin",  band: "Common" },
   { value: "Carol",   band: "Common" },
-  { value: "Brian",   band: "Common" },
+  { value: "Priya",   band: "Common" },
+  { value: "Yusuf",   band: "Common" },
+  { value: "Aoife",   band: "Common" },
 
-  // Uncommon (12) — distinctive but real-world
+  // Uncommon (12) — distinctive names, mix of British-uncommon and international
   { value: "Derek",   band: "Uncommon" },
-  { value: "Priya",   band: "Uncommon" },
-  { value: "Yusuf",   band: "Uncommon" },
-  { value: "Aoife",   band: "Uncommon" },
+  { value: "Bernard", band: "Uncommon" },
+  { value: "Agatha",  band: "Uncommon" },
+  { value: "Humphrey", band: "Uncommon" },
   { value: "Hans",    band: "Uncommon" },
   { value: "Siobhan", band: "Uncommon" },
   { value: "Kenji",   band: "Uncommon" },
