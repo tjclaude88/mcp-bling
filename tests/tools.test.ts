@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { hexToAnsi, generateThemeForPlatform, rollIdentityHandler } from "../src/tools.js";
+import { describe, it, expect, afterEach } from "vitest";
+import { hexToAnsi, generateThemeForPlatform, rollIdentityHandler, saveLastRollHandler, _resetLastRollForTests } from "../src/tools.js";
 import type { BlingIdentity } from "../src/types.js";
+import { writeFile, unlink, readFile, stat } from "node:fs/promises";
 
 // A minimal identity for testing theme generation
 const testIdentity: BlingIdentity = {
@@ -92,5 +93,61 @@ describe("rollIdentityHandler", () => {
     expect(parsed.paragraph).toBeDefined();
     expect(parsed.framed).toBeDefined();
     expect(typeof parsed.identity.name).toBe("string");
+  });
+});
+
+describe("saveLastRollHandler", () => {
+  const testPath = "tests/fixtures/_temp_save.json";
+  const backupPath = `${testPath}.bak`;
+
+  afterEach(async () => {
+    try { await unlink(testPath); } catch { /* ignore */ }
+    try { await unlink(backupPath); } catch { /* ignore */ }
+    _resetLastRollForTests();
+  });
+
+  it("returns an error when nothing has been rolled this session", async () => {
+    _resetLastRollForTests();
+    const result = await saveLastRollHandler(testPath);
+    const text = result.content[0]!.text;
+    const parsed = JSON.parse(text);
+    expect(parsed.error).toBeDefined();
+    expect(parsed.error).toMatch(/no roll/i);
+    expect(result.isError).toBe(true);
+  });
+
+  it("writes the most recent roll's identity to the supplied path", async () => {
+    await rollIdentityHandler();
+    const result = await saveLastRollHandler(testPath);
+    const text = result.content[0]!.text;
+    const parsed = JSON.parse(text);
+    expect(parsed.ok).toBe(true);
+    const written = JSON.parse(await readFile(testPath, "utf-8"));
+    expect(typeof written.name).toBe("string");
+    expect(written.office).toBeDefined();
+    expect(written.homunculus).toBeDefined();
+  });
+
+  it("backs up an existing file before overwriting", async () => {
+    await writeFile(testPath, JSON.stringify({ name: "OldConfig" }), "utf-8");
+    await rollIdentityHandler();
+    const result = await saveLastRollHandler(testPath);
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(parsed.ok).toBe(true);
+    expect(parsed.backup).toBe(backupPath);
+
+    const backup = JSON.parse(await readFile(backupPath, "utf-8"));
+    expect(backup.name).toBe("OldConfig");
+    const newConfig = JSON.parse(await readFile(testPath, "utf-8"));
+    expect(newConfig.name).not.toBe("OldConfig");
+  });
+
+  it("does not create a backup when the target file does not exist", async () => {
+    await rollIdentityHandler();
+    const result = await saveLastRollHandler(testPath);
+    const parsed = JSON.parse(result.content[0]!.text);
+    expect(parsed.ok).toBe(true);
+    expect(parsed.backup).toBeNull();
+    await expect(stat(backupPath)).rejects.toThrow();
   });
 });

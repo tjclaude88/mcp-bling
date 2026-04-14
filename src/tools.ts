@@ -5,6 +5,7 @@
 import type { BlingIdentity, RollOutput } from "./types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { writeFile, copyFile, access } from "node:fs/promises";
 import { loadIdentity } from "./identity.js";
 import { rollIdentity, type Rng } from "./mystery_box.js";
 
@@ -33,6 +34,59 @@ export async function rollIdentityHandler(rng?: Rng): Promise<{
     content: [{ type: "text" as const, text: JSON.stringify(out, null, 2) }],
     structuredContent: out,
   };
+}
+
+/**
+ * Save the most-recent roll's identity to the given path.
+ *
+ * Safety: if the target file already exists, it is first copied to
+ * `<path>.bak` so the user's previous config is recoverable. This
+ * matters because `bling.json` may have been hand-tuned.
+ *
+ * Returns { ok: true, backup: <path|null> } on success,
+ *         { error: <message> } with isError: true if nothing has been rolled.
+ */
+export async function saveLastRollHandler(targetPath: string): Promise<{
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+}> {
+  if (lastRoll === null) {
+    const errorBody = {
+      error: "No roll has happened this session. Call roll_identity first.",
+    };
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(errorBody) }],
+      structuredContent: errorBody,
+      isError: true,
+    };
+  }
+
+  // If the target exists, back it up before overwriting.
+  let backup: string | null = null;
+  try {
+    await access(targetPath);                     // throws if missing
+    backup = `${targetPath}.bak`;
+    await copyFile(targetPath, backup);
+  } catch {
+    // File doesn't exist — nothing to back up.
+  }
+
+  await writeFile(targetPath, JSON.stringify(lastRoll.identity, null, 2), "utf-8");
+  const successBody = {
+    ok: true as const,
+    written_to: targetPath,
+    backup,
+  };
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(successBody) }],
+    structuredContent: successBody,
+  };
+}
+
+/** Test-only — clears module state between tests. Do not call from production. */
+export function _resetLastRollForTests(): void {
+  lastRoll = null;
 }
 
 /**
@@ -221,5 +275,33 @@ export function registerTools(server: McpServer, blingPath: string): void {
         structuredContent: out.structuredContent as unknown as { [k: string]: unknown },
       };
     },
+  );
+
+  // Tool 4: save_last_roll
+  // Writes the most-recent roll's identity to the bling.json path.
+  // Destructive — overwrites the target file (a backup is written first).
+  const saveLastRollOutputSchema = {
+    ok: z.boolean().optional(),
+    written_to: z.string().optional(),
+    backup: z.string().nullable().optional(),
+    error: z.string().optional(),
+  };
+
+  server.registerTool(
+    "save_last_roll",
+    {
+      title: "Save Last WOW Roll to bling.json",
+      description:
+        "Persist the most-recent WOW roll by writing it to the configured bling.json path. If a file already exists at that path it is first copied to <path>.bak so user-tuned configs are recoverable. Returns the backup path (or null if the target was new).",
+      inputSchema: {},
+      outputSchema: saveLastRollOutputSchema,
+      annotations: {
+        readOnlyHint: false,        // writes to disk
+        destructiveHint: true,      // overwrites an existing file (with backup)
+        idempotentHint: false,      // a second call after a fresh roll writes a different identity
+        openWorldHint: true,        // touches the local filesystem
+      },
+    },
+    () => saveLastRollHandler(blingPath),
   );
 }
