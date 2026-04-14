@@ -1,0 +1,148 @@
+// src/mystery_box/pools.ts
+// The data layer: 13 trait pools keyed by category.
+//
+// Starter pools: ~6 entries per category, spread across the 5 bands.
+// Spec target is 30–60 per category — grow these in a follow-up commit.
+// Adding entries does NOT require touching any logic.
+
+import type { TraitPool } from "../types.js";
+
+const NAMES: TraitPool = [
+  { value: "Steve",   band: "Common" },
+  { value: "Karen",   band: "Common" },
+  { value: "Derek",   band: "Uncommon" },
+  { value: "Priya",   band: "Uncommon" },
+  { value: "Brenda from Accounts", band: "Rare" },
+  { value: "Günther", band: "Legendary" },
+  { value: "The One Who Doesn't Speak", band: "Mythic" },
+];
+
+const JOB_TITLES: TraitPool = [
+  { value: "Senior Developer",          band: "Common" },
+  { value: "QA Lead",                   band: "Common" },
+  { value: "Regional Manager",          band: "Uncommon" },
+  { value: "ASCII Comptroller",         band: "Rare" },
+  { value: "Wizard of Light Bulb Moments", band: "Legendary" },
+  { value: "Galactic Viceroy of Research Excellence", band: "Mythic" },
+];
+
+const DESK_SETUPS: TraitPool = [
+  { value: "a single dying succulent",                     band: "Common" },
+  { value: "a coffee mug labelled WORLD'S OKAYEST DBA",    band: "Common" },
+  { value: "a moleskine that nobody has ever seen open",   band: "Uncommon" },
+  { value: "a 9-monitor day-trading rig",                  band: "Rare" },
+  { value: "forty unwashed mugs in a stable equilibrium",  band: "Legendary" },
+  { value: "a full-size cardboard cutout of Nicolas Cage", band: "Mythic" },
+];
+
+const HABITS: TraitPool = [
+  { value: "sends emails at midnight",                                       band: "Common" },
+  { value: "replies-all to everything",                                      band: "Common" },
+  { value: "microwaves fish despite three separate HR warnings",             band: "Uncommon" },
+  { value: "hums Enya during code reviews",                                  band: "Rare" },
+  { value: "kept a folding cot in a server cabinet during a year-long migration", band: "Legendary" },
+  { value: "has not spoken in a meeting since 2019 and still gets bonuses",  band: "Mythic" },
+];
+
+const COFFEE_RITUALS: TraitPool = [
+  { value: "black coffee, no nonsense",                                    band: "Common" },
+  { value: "tea with milk, exactly one sugar",                             band: "Common" },
+  { value: "a French press brewed at the desk every morning",              band: "Uncommon" },
+  { value: "a Starbucks Medicine Ball, every day, no exceptions",          band: "Rare" },
+  { value: "Soylent only, and will tell you about it",                     band: "Legendary" },
+  { value: "a kombucha SCOBY fermenting next to the keyboard",             band: "Mythic" },
+];
+
+const MEETING_ENERGY: TraitPool = [
+  { value: "always on mute",                                            band: "Common" },
+  { value: "always 4 minutes late, always with a reason",               band: "Common" },
+  { value: "interrupts with 'let me just jump in here'",                band: "Uncommon" },
+  { value: "monologues for 47 uninterrupted minutes",                   band: "Rare" },
+  { value: "books 7 a.m. meetings 'to respect everyone's focus time'",  band: "Legendary" },
+  { value: "speaks only in acronyms nobody else recognises",            band: "Mythic" },
+];
+
+const PASSIVE_AGGRESSIVE: TraitPool = [
+  { value: "Per my last email",                            band: "Common" },
+  { value: "Just circling back",                           band: "Common" },
+  { value: "Happy to discuss offline",                     band: "Uncommon" },
+  { value: "Resending with urgency (same email, 8 minutes later, red exclamation)", band: "Rare" },
+  { value: "As discussed (it was not discussed)",          band: "Legendary" },
+  { value: "Adding a +1 with no further comment",          band: "Mythic" },
+];
+
+const PHYSICAL_HEIGHT: TraitPool = [
+  { value: "average build",                                   band: "Common" },
+  { value: "shorter than expected",                           band: "Common" },
+  { value: "tall enough to comment on it",                    band: "Uncommon" },
+  { value: "somehow taller in meetings than in person",      band: "Rare" },
+  { value: "looms",                                           band: "Legendary" },
+  { value: "occupies more conceptual than physical space",    band: "Mythic" },
+];
+
+const PHYSICAL_ACCESSORY: TraitPool = [
+  { value: "a single lanyard with one badge",                     band: "Common" },
+  { value: "a corporate fleece",                                  band: "Common" },
+  { value: "reading glasses on a chain",                          band: "Uncommon" },
+  { value: "a lanyard with 14 badges of varying importance",      band: "Rare" },
+  { value: "a single shipwreck earring they will tell you about", band: "Legendary" },
+  { value: "an ID badge from a company that no longer exists",    band: "Mythic" },
+];
+
+const PHYSICAL_EXPRESSION: TraitPool = [
+  { value: "polite disappointment",                  band: "Common" },
+  { value: "neutral, unreadable",                    band: "Common" },
+  { value: "the face of someone about to send a long email", band: "Uncommon" },
+  { value: "eyes that have seen SAP",                band: "Rare" },
+  { value: "permanently mid-sentence",               band: "Legendary" },
+  { value: "wears nineteen subtly different smiles", band: "Mythic" },
+];
+
+const PHYSICAL_MATERIAL: TraitPool = [
+  { value: "a cardigan, at least one",                              band: "Common" },
+  { value: "polo shirt, jeans, sensible shoes",                     band: "Common" },
+  { value: "permed hair that hasn't changed since 1994",            band: "Uncommon" },
+  { value: "the exact outfit from their LinkedIn profile, 1999",    band: "Rare" },
+  { value: "a tie pinned with what may be a live firefly",          band: "Legendary" },
+  { value: "dressed entirely in clothes received as conference swag", band: "Mythic" },
+];
+
+const THEME_PRIMARY: TraitPool = [
+  { value: "#9C6B3A", band: "Common" },     // office-tan
+  { value: "#2D4A4F", band: "Common" },     // accountant teal
+  { value: "#5C3D2E", band: "Uncommon" },   // boardroom mahogany
+  { value: "#A23E48", band: "Rare" },       // expense-report red
+  { value: "#1F4E79", band: "Legendary" },  // PowerPoint navy
+  { value: "#FFCD3C", band: "Mythic" },     // overhead-projector yellow
+];
+
+const THEME_ACCENT: TraitPool = [
+  { value: "#D9D9D9", band: "Common" },
+  { value: "#7F7F7F", band: "Common" },
+  { value: "#C0BFA8", band: "Uncommon" },
+  { value: "#6E8B3D", band: "Rare" },
+  { value: "#503D2E", band: "Legendary" },
+  { value: "#FF6F61", band: "Mythic" },
+];
+
+/**
+ * All trait pools, keyed by category name. The category names match the
+ * keys used downstream by the roller and the per_trait breakdown.
+ */
+export const POOLS = {
+  name: NAMES,
+  job_title: JOB_TITLES,
+  desk_setup: DESK_SETUPS,
+  habit: HABITS,
+  coffee_ritual: COFFEE_RITUALS,
+  meeting_energy: MEETING_ENERGY,
+  passive_aggressive: PASSIVE_AGGRESSIVE,
+  physical_height: PHYSICAL_HEIGHT,
+  physical_accessory: PHYSICAL_ACCESSORY,
+  physical_expression: PHYSICAL_EXPRESSION,
+  physical_material: PHYSICAL_MATERIAL,
+  theme_primary: THEME_PRIMARY,
+  theme_accent: THEME_ACCENT,
+} as const;
+
+export type CategoryKey = keyof typeof POOLS;
