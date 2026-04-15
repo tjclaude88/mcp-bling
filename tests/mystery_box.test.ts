@@ -486,7 +486,7 @@ describe("rollIdentity", () => {
 });
 
 describe("rollIdentity — distribution (10k rolls)", () => {
-  it("tier distribution lands within ±5pp of the spec targets", () => {
+  it("tier distribution lands within ±2pp of the spec targets", () => {
     const rng = mulberry32(2026);
     const tally: Record<string, number> = {};
     const N = 10_000;
@@ -498,22 +498,25 @@ describe("rollIdentity — distribution (10k rolls)", () => {
     // Spec §5.4 targets: 50 / 30 / 14 / 5 / 1 (percent).
     // Calibration lives in src/mystery_box/scoring.ts — TIER_THRESHOLDS
     // and scoreToPercentile are tuned against this exact seed and pool
-    // composition. Tolerances are ±10pp around each target — narrow
-    // enough to catch calibration drift, wide enough to absorb the
-    // Named Subject blip (+0.5pp to HR Warned) and sampling noise at
-    // N=10k. Tighten further once pools are expanded to 30–60 entries
-    // per category.
+    // composition. Tolerances are ±2pp around each target — tightened
+    // 2026-04-15 from ±10pp after pool expansion to 30–45 entries per
+    // category produced empirical max-delta of 1.2pp at N=10k seed=2026
+    // (and ≤1.3pp across 6 sampled seeds). HR Warned gets an asymmetric
+    // 0–3 band: Named Subjects (0.5% of rolls) all classify as HR Warned,
+    // boosting it ~+0.5pp above the bare-target value of 1%.
     const pct = (k: string) => (tally[k] ?? 0) / N * 100;
 
-    // Per-tier bounds (±10pp around spec target):
-    expect(pct("Filing Clerk")).toBeGreaterThan(40);
-    expect(pct("Filing Clerk")).toBeLessThan(60);
-    expect(pct("Team Lead")).toBeGreaterThan(20);
-    expect(pct("Team Lead")).toBeLessThan(40);
-    expect(pct("Middle Manager")).toBeGreaterThan(4);
-    expect(pct("Middle Manager")).toBeLessThan(24);
-    expect(pct("C-Suite")).toBeLessThan(15);
-    expect(pct("HR Warned Us About")).toBeLessThan(6);
+    // Per-tier bounds (±2pp around spec target):
+    expect(pct("Filing Clerk")).toBeGreaterThan(48);
+    expect(pct("Filing Clerk")).toBeLessThan(52);
+    expect(pct("Team Lead")).toBeGreaterThan(28);
+    expect(pct("Team Lead")).toBeLessThan(32);
+    expect(pct("Middle Manager")).toBeGreaterThan(12);
+    expect(pct("Middle Manager")).toBeLessThan(16);
+    expect(pct("C-Suite")).toBeGreaterThan(3);
+    expect(pct("C-Suite")).toBeLessThan(7);
+    expect(pct("HR Warned Us About")).toBeGreaterThan(0);
+    expect(pct("HR Warned Us About")).toBeLessThan(3);
 
     // Regression guard: every tier must be reachable. Catches the
     // "unreachable tier" class of bug (fixed earlier in 3b973ef).
