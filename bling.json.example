@@ -1,0 +1,35 @@
+{
+  "name": "Brenda from Accounts",
+  "personality": {
+    "tone": "polite",
+    "formality": "professional",
+    "humor": "dry",
+    "catchphrase": "Per my last email"
+  },
+  "physical": {
+    "species": "human",
+    "height": "permanently mid-sigh",
+    "accessory": "a lanyard with 14 badges of varying importance",
+    "expression": "polite disappointment",
+    "material": "a cardigan, at least one"
+  },
+  "theme": {
+    "primary_color": "#9C6B3A",
+    "accent_color": "#D9D9D9"
+  },
+  "office": {
+    "job_title": "ASCII Comptroller",
+    "desk_setup": "a coffee mug labelled WORLD'S OKAYEST DBA",
+    "habit": "microwaves fish despite three separate HR warnings",
+    "coffee_ritual": "black coffee, no nonsense",
+    "meeting_energy": "always 4 minutes late, always with a reason",
+    "passive_aggressive": "Per my last email"
+  },
+  "homunculus": {
+    "subject_id": "0147",
+    "cohort": "Tuesday",
+    "classification": "Middle Manager",
+    "ingested": "2025-07-14",
+    "flag": "flagged for review"
+  }
+}

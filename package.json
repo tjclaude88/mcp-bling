@@ -4,6 +4,15 @@
   "description": "MCP server that delivers bot identity and visual styling",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "bling-bag": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md",
+    "bling.json.example"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "npm run build && node dist/index.js",
@@ -16,7 +25,15 @@
     "identity",
     "styling"
   ],
+  "author": "tjclaude88",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tjclaude88/mcp-bling.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^4.3.6"

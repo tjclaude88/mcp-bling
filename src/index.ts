@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // src/index.ts
 // Bling Bag MCP Server — entry point.
 // Creates the server, registers tools, and starts listening on stdio.
