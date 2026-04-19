@@ -33,16 +33,24 @@ Five tools, grouped into two halves:
 - Node.js 20 or later
 - An MCP-compatible client (Claude Code, Claude Desktop, Codex, Cursor, etc.)
 
-### Set up the server
+### Add the package
 
 ```bash
-git clone <this-repo>            # or download / copy
+npm install bling-bag
+```
+
+Or run it on-demand without installing — MCP clients can launch it directly via `npx bling-bag` (see client config below).
+
+#### For development (modifying the source)
+
+```bash
+git clone https://github.com/tjclaude88/mcp-bling.git
 cd mcp-bling
 npm install
 npm run build
 ```
 
-That produces a runnable server at `dist/index.js`.
+Produces a runnable server at `dist/index.js`.
 
 ### Wire it into your MCP client
 
@@ -50,14 +58,14 @@ The server uses **stdio transport** — clients launch it as a child process, no
 
 #### Claude Code
 
-Add to your `~/.config/claude-code/mcp.json` (or wherever your client stores MCP server config):
+Add to your Claude Code MCP config (location varies by version):
 
 ```json
 {
   "mcpServers": {
     "bling": {
-      "command": "node",
-      "args": ["/absolute/path/to/mcp-bling/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "bling-bag"],
       "env": {
         "BLING_PATH": "/absolute/path/to/your/bling.json"
       }
@@ -65,6 +73,8 @@ Add to your `~/.config/claude-code/mcp.json` (or wherever your client stores MCP
   }
 }
 ```
+
+`npx -y bling-bag` downloads and runs the latest version without requiring a separate install step.
 
 #### Claude Desktop
 
@@ -74,11 +84,31 @@ Same shape, in `claude_desktop_config.json`:
 {
   "mcpServers": {
     "bling": {
-      "command": "node",
-      "args": ["/absolute/path/to/mcp-bling/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "bling-bag"],
+      "env": {
+        "BLING_PATH": "/absolute/path/to/your/bling.json"
+      }
     }
   }
 }
+```
+
+#### Pinning to a version (recommended for production)
+
+To avoid picking up future releases automatically, pin a specific version:
+
+```json
+"args": ["-y", "bling-bag@0.1.0"]
+```
+
+#### Developer-mode invocation (from a local clone)
+
+If you've cloned the repo and want to run from `dist/` directly, use:
+
+```json
+"command": "node",
+"args": ["/absolute/path/to/mcp-bling/dist/index.js"]
 ```
 
 If `BLING_PATH` is not set, the server looks for `./bling.json` in its working directory.
