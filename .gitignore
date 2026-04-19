@@ -14,3 +14,6 @@ CLAUDE.md
 
 # npm auth tokens — never commit
 .npmrc
+
+# npm pack artifacts — local-only, not a commit
+*.tgz

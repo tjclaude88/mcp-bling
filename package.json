@@ -11,8 +11,13 @@
     "dist/",
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
     "bling.json.example"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "npm run build && node dist/index.js",
@@ -21,15 +26,22 @@
   },
   "keywords": [
     "mcp",
+    "mcp-server",
+    "model-context-protocol",
     "bot",
     "identity",
-    "styling"
+    "styling",
+    "claude"
   ],
   "author": "tjclaude",
   "license": "MIT",
+  "homepage": "https://github.com/tjclaude88/mcp-bling#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tjclaude88/mcp-bling.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tjclaude88/mcp-bling/issues"
   },
   "publishConfig": {
     "access": "public"
