@@ -1,0 +1,39 @@
+# Keep the Docker build context small and safe.
+# Anything listed here is NOT copied into the build context, so it also
+# cannot end up in the image (defense in depth for secrets and local state).
+
+# Version control
+.git
+.github
+.gitignore
+
+# Dependency and build artefacts (will be (re)built inside the image)
+node_modules
+dist
+*.tgz
+
+# npm auth tokens — must never be in an image
+.npmrc
+
+# Local/user config that should not ship
+CLAUDE.md
+bling.json
+bling.json.bak
+.claude
+
+# Dev-time files not needed at runtime
+tests
+scripts
+docs
+README.md
+SECURITY.md
+CHANGELOG.md
+LICENSE
+
+# Editor / IDE metadata
+.vscode
+.idea
+
+# Docker meta (not needed inside the image)
+Dockerfile
+.dockerignore
