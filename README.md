@@ -276,7 +276,7 @@ npm run test:watch   # re-run tests on file changes
 
 ### Inspection scripts
 
-Two Node ESM helpers under `scripts/` let you inspect the WOW engine without booting the MCP server:
+Two Node ESM helpers under `scripts/` let you inspect the WOW engine without booting the MCP server (these are included only in a cloned repo — they are **not** shipped in the `npm install bling-bag` package):
 
 ```bash
 node scripts/show-rolls.mjs 8 2026          # print 8 framed share cards (seed=2026)

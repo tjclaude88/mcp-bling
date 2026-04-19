@@ -4,6 +4,7 @@
   "description": "MCP server that delivers bot identity and visual styling",
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "bling-bag": "dist/index.js"
   },
@@ -33,7 +34,7 @@
     "styling",
     "claude"
   ],
-  "author": "tjclaude",
+  "author": "tjclaude <tjclaude@proton.me>",
   "license": "MIT",
   "homepage": "https://github.com/tjclaude88/mcp-bling#readme",
   "repository": {
