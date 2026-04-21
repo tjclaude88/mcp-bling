@@ -5,6 +5,16 @@ All notable changes to `bling-bag` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] — 2026-04-21
+
+Metadata-only release to list `bling-bag` on the official MCP Registry
+(`registry.modelcontextprotocol.io`).
+
+### Added
+
+- `mcpName` field in `package.json` (`io.github.tjclaude88/bling-bag`) — required
+  by the MCP Registry for namespace ownership verification against the npm package
+
 ## [0.1.0] — 2026-04-19
 
 First public release.
