@@ -5,6 +5,22 @@ All notable changes to `bling-bag` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-04-30
+
+### Added
+- **Legends pool** — a second identity variant: historical figures placed in absurd corporate roles. Pass `variant: "legends"` to `roll_identity`.
+- `variant` parameter on `roll_identity` tool (`"wow"` | `"legends"`, default `"wow"`). All existing integrations work without any changes.
+
+### Changed
+- Messaging: "Give your bot an identity!" now leads every public surface (npm, GitHub, server.json, README).
+- Tool display names updated: "Spin the Wheel", "Who's My Bot?", "Style Me Up", "Lock It In", "Show Off My Card". Internal tool names unchanged — no breaking change.
+- README rewritten: product value leads, technical details moved lower.
+
+### Unchanged
+- `TIER_THRESHOLDS` in `scoring.ts` — not recalibrated.
+- Internal tool names (`roll_identity`, `get_identity`, etc.).
+- WOW pools and weights.
+
 ## [0.1.1] — 2026-04-21
 
 Metadata-only release to list `bling-bag` on the official MCP Registry

@@ -1,8 +1,8 @@
 {
   "name": "bling-bag",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "mcpName": "io.github.tjclaude88/bling-bag",
-  "description": "MCP server that delivers bot identity and visual styling",
+  "description": "Give your bot an identity!",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
