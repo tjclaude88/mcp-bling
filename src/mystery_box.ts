@@ -7,21 +7,21 @@
 //   2. Host the top-level `rollIdentity` orchestrator, which is the only
 //      function that depends on every sub-module — putting it here keeps
 //      the dependency graph a clean tree (barrel → sub-modules).
-//
-// See:
-//   docs/superpowers/specs/2026-04-13-mystery-box-design.md
 
-import type { PerTrait, RolledIdentity, RollOutput, TraitEntry } from "./types.js";
+import type { PerTrait, RolledIdentity, RollOutput, TraitEntry, Variant } from "./types.js";
 import { pickWeighted, type Rng } from "./mystery_box/rng.js";
 import { POOLS, type CategoryKey } from "./mystery_box/pools.js";
+import { LEGENDS_POOLS } from "./mystery_box/legends_pools.js";
 import { rarityScore, scoreToPercentile, tierFromScore } from "./mystery_box/scoring.js";
-import { renderFramed, renderParagraph, rollHomunculusBlock } from "./mystery_box/rendering.js";
+import { renderFramed, renderParagraph, rollHomunculusBlock, PARAGRAPH_TEMPLATES } from "./mystery_box/rendering.js";
+import { LEGENDS_PARAGRAPH_TEMPLATES } from "./mystery_box/legends_rendering.js";
 import { pickNamedSubject } from "./mystery_box/named.js";
 
 // Re-export the public surface so `./mystery_box.js` stays the single entry
 // point for tests and future MCP tool code.
 export { mulberry32, BAND_WEIGHTS, pickWeighted, type Rng } from "./mystery_box/rng.js";
 export { POOLS, type CategoryKey } from "./mystery_box/pools.js";
+export { LEGENDS_POOLS } from "./mystery_box/legends_pools.js";
 export { rarityScore, tierFromScore, scoreToPercentile } from "./mystery_box/scoring.js";
 export {
   PARAGRAPH_TEMPLATES,
@@ -29,20 +29,20 @@ export {
   renderFramed,
   rollHomunculusBlock,
 } from "./mystery_box/rendering.js";
+export { LEGENDS_PARAGRAPH_TEMPLATES } from "./mystery_box/legends_rendering.js";
 export { NAMED_SUBJECTS, pickNamedSubject, type NamedSubject } from "./mystery_box/named.js";
 
 // ---------------------------------------------------------------------------
 // Main orchestrator
 // ---------------------------------------------------------------------------
 
-/** Probability that a roll returns a hand-authored Named Subject. */
+/** Probability that a WOW roll returns a hand-authored Named Subject. */
 export const NAMED_SUBJECT_PROBABILITY = 0.005;
 
 /**
  * Personality fields are NOT rolled — they're held constant per the spec's
  * non-goals (no behaviour-shaping injection). These defaults apply to every
- * randomly-assembled bot. Named Subjects override with their own personality
- * (see makeNamedSubject in ./mystery_box/named.ts).
+ * randomly-assembled bot. Named Subjects override with their own personality.
  */
 const DEFAULT_PERSONALITY = {
   tone: "polite",
@@ -51,16 +51,24 @@ const DEFAULT_PERSONALITY = {
 } as const;
 
 /**
- * Roll a complete identity. Two paths:
- *   1. With probability 0.5%, return a Named Subject (no random assembly).
- *   2. Otherwise, draw one trait from each pool, assemble the identity,
- *      score it, derive the tier, render the paragraph, build the frame.
+ * Roll a complete identity.
  *
- * `rng` defaults to Math.random — pass a seedable PRNG in tests.
+ * @param rng     - Defaults to Math.random. Pass a seedable PRNG in tests.
+ * @param variant - "wow" (Weird Office Workers, default) or "legends"
+ *                  (historical figures in absurd corporate roles).
+ *
+ * WOW path has two sub-paths:
+ *   1. With probability 0.5%, return a Named Subject (no random assembly).
+ *   2. Otherwise, draw one trait from each pool, assemble, score, render.
+ *
+ * Legends path always uses random assembly (no Named Subjects).
  */
-export function rollIdentity(rng: Rng = Math.random): RollOutput {
-  // Path 1: Named Subject pre-roll
-  if (rng() < NAMED_SUBJECT_PROBABILITY) {
+export function rollIdentity(rng: Rng = Math.random, variant: Variant = "wow"): RollOutput {
+  const pools = variant === "legends" ? LEGENDS_POOLS : POOLS;
+  const templates = variant === "legends" ? LEGENDS_PARAGRAPH_TEMPLATES : PARAGRAPH_TEMPLATES;
+
+  // Named Subject pre-roll — WOW only
+  if (variant === "wow" && rng() < NAMED_SUBJECT_PROBABILITY) {
     const ns = pickNamedSubject(rng);
     const score = 1000;
     const percentile = 99;
@@ -79,11 +87,9 @@ export function rollIdentity(rng: Rng = Math.random): RollOutput {
     };
   }
 
-  // Path 2: random assembly. Draw one entry from every pool.
-  // Object.entries preserves insertion order for string keys (per ES2015),
-  // so per_trait below is stably ordered to match the POOLS declaration.
+  // Random assembly path — used by both variants
   const drawn = Object.fromEntries(
-    (Object.entries(POOLS) as Array<[CategoryKey, typeof POOLS[CategoryKey]]>).map(
+    (Object.entries(pools) as Array<[CategoryKey, typeof pools[CategoryKey]]>).map(
       ([key, pool]) => [key, pickWeighted(pool, rng)] as const,
     ),
   ) as Record<CategoryKey, TraitEntry>;
@@ -96,7 +102,6 @@ export function rollIdentity(rng: Rng = Math.random): RollOutput {
   const tier = tierFromScore(score);
   const percentile = scoreToPercentile(score);
 
-  // Build the rolled identity from the drawn traits.
   const homunculus = rollHomunculusBlock(rng, tier);
   const identity: RolledIdentity = {
     name: drawn.name.value,
@@ -123,7 +128,7 @@ export function rollIdentity(rng: Rng = Math.random): RollOutput {
     homunculus,
   };
 
-  const paragraph = renderParagraph(identity, rng);
+  const paragraph = renderParagraph(identity, rng, templates);
   const framed = renderFramed(identity, paragraph, score, percentile);
 
   return {

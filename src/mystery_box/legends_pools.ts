@@ -1,0 +1,724 @@
+// src/mystery_box/legends_pools.ts
+// Trait pools for the Legends variant — historical figures in absurd corporate roles.
+// All 13 CategoryKeys must be present so the rarity engine can reuse them unchanged.
+
+import type { TraitPool } from "../types.js";
+import type { CategoryKey } from "./pools.js";
+
+// ---------------------------------------------------------------------------
+// Names — historical figures, 100+ years dead
+// ---------------------------------------------------------------------------
+const LEGENDS_NAMES: TraitPool = [
+  // Common (21) — the household names
+  { value: "Julius Caesar",            band: "Common" },
+  { value: "Cleopatra",                band: "Common" },
+  { value: "Napoleon Bonaparte",       band: "Common" },
+  { value: "Marie Curie",              band: "Common" },
+  { value: "William Shakespeare",      band: "Common" },
+  { value: "Sun Tzu",                  band: "Common" },
+  { value: "Leonardo da Vinci",        band: "Common" },
+  { value: "Aristotle",               band: "Common" },
+  { value: "Charles Darwin",           band: "Common" },
+  { value: "Joan of Arc",              band: "Common" },
+  { value: "Nikola Tesla",             band: "Common" },
+  { value: "Galileo Galilei",          band: "Common" },
+  { value: "Socrates",                 band: "Common" },
+  { value: "Marco Polo",               band: "Common" },
+  { value: "Florence Nightingale",     band: "Common" },
+  { value: "Isaac Newton",             band: "Common" },
+  { value: "Plato",                    band: "Common" },
+  { value: "Confucius",                band: "Common" },
+  { value: "Archimedes",               band: "Common" },
+  { value: "Catherine the Great",      band: "Common" },
+  { value: "Hannibal Barca",           band: "Common" },
+
+  // Uncommon (12) — slightly less famous but still legendary
+  { value: "Niccolò Machiavelli",      band: "Uncommon" },
+  { value: "Harriet Tubman",           band: "Uncommon" },
+  { value: "Genghis Khan",             band: "Uncommon" },
+  { value: "Ada Lovelace",             band: "Uncommon" },
+  { value: "Ramses II",                band: "Uncommon" },
+  { value: "Hypatia of Alexandria",    band: "Uncommon" },
+  { value: "Attila the Hun",           band: "Uncommon" },
+  { value: "Ching Shih",               band: "Uncommon" },
+  { value: "Saladin",                  band: "Uncommon" },
+  { value: "Boudicca",                 band: "Uncommon" },
+  { value: "Zheng He",                 band: "Uncommon" },
+  { value: "Mary Wollstonecraft",      band: "Uncommon" },
+
+  // Rare (7) — names with an editorial qualifier
+  { value: "Julius Caesar (post-Ides)", band: "Rare" },
+  { value: "Napoleon (the Elba years)", band: "Rare" },
+  { value: "Socrates (asking questions again)", band: "Rare" },
+  { value: "Tesla (the unpaid kind)",   band: "Rare" },
+  { value: "Darwin (still working on a theory)", band: "Rare" },
+  { value: "Machiavelli (off the record)", band: "Rare" },
+  { value: "Genghis Khan (in a meeting)", band: "Rare" },
+
+  // Legendary (3)
+  { value: "The Real Leonardo (not DiCaprio)", band: "Legendary" },
+  { value: "Sun Tzu, Agile Coach",     band: "Legendary" },
+  { value: "Cleopatra, Brand Ambassador", band: "Legendary" },
+
+  // Mythic (2)
+  { value: "She Who Rewrote History (in a different font)", band: "Mythic" },
+  { value: "The One Who Conquered It All and Then Got Ides'd", band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Job titles — historical roles reframed in corporate language
+// ---------------------------------------------------------------------------
+const LEGENDS_JOB_TITLES: TraitPool = [
+  // Common (21)
+  { value: "Head of Expansion",                 band: "Common" },
+  { value: "Chief Brand Ambassador",            band: "Common" },
+  { value: "Strategy Consultant",               band: "Common" },
+  { value: "Regional Manager (Deceased)",       band: "Common" },
+  { value: "Research Lead",                     band: "Common" },
+  { value: "Content Creator",                   band: "Common" },
+  { value: "Operations Director",               band: "Common" },
+  { value: "Chief Curiosity Officer",           band: "Common" },
+  { value: "Talent Acquisition Lead",           band: "Common" },
+  { value: "Field Commander",                   band: "Common" },
+  { value: "Philosophy Department",             band: "Common" },
+  { value: "Innovation Specialist",             band: "Common" },
+  { value: "Marine Navigation Lead",            band: "Common" },
+  { value: "Healthcare Reform Lead",            band: "Common" },
+  { value: "Applied Mathematics",               band: "Common" },
+  { value: "Founder and Philosopher",           band: "Common" },
+  { value: "Territory Acquisition Manager",     band: "Common" },
+  { value: "Cross-Cultural Relations",          band: "Common" },
+  { value: "Logistics and Supply Director",     band: "Common" },
+  { value: "Governance Strategist",             band: "Common" },
+  { value: "Knowledge Management Officer",      band: "Common" },
+
+  // Uncommon (12)
+  { value: "Hostile Takeover Specialist",       band: "Uncommon" },
+  { value: "Regional Manager (France and Surrounding Areas)", band: "Uncommon" },
+  { value: "Lab Safety's Most Wanted",          band: "Uncommon" },
+  { value: "People Operations Lead",            band: "Uncommon" },
+  { value: "Talent Acquisition — Survival of the Fittest", band: "Uncommon" },
+  { value: "VP of Disruptive Reformation",      band: "Uncommon" },
+  { value: "Director of Unsolicited Advice",    band: "Uncommon" },
+  { value: "Head of Questioning Everything",    band: "Uncommon" },
+  { value: "Senior Conqueror, Emerging Markets", band: "Uncommon" },
+  { value: "Chief Grievance Officer",           band: "Uncommon" },
+  { value: "Strategic Hemlock Risk Manager",    band: "Uncommon" },
+  { value: "Associate Director of Burning Things Down", band: "Uncommon" },
+
+  // Rare (7)
+  { value: "Strategy Consultant (Deceased, Unavailable Tuesdays)", band: "Rare" },
+  { value: "Interim Emperor (Self-Appointed)",  band: "Rare" },
+  { value: "Head of Mug Allocation (Former General)", band: "Rare" },
+  { value: "Principal Gadfly, Philosophy Division", band: "Rare" },
+  { value: "Chair of the Unfinished Masterpiece Subcommittee", band: "Rare" },
+  { value: "Warden of the Second-Floor Printing Press", band: "Rare" },
+  { value: "Deputy Director of Torch-and-Pitchfork Operations", band: "Rare" },
+
+  // Legendary (3)
+  { value: "Grand Architect of the Known World", band: "Legendary" },
+  { value: "Chancellor of Theories Nobody Can Disprove", band: "Legendary" },
+  { value: "Wizard of Extremely Inconvenient Revolutions", band: "Legendary" },
+
+  // Mythic (2)
+  { value: "Eternal Custodian of the Quarterly Conquest Roadmap", band: "Mythic" },
+  { value: "Galactic Sovereign of Historical Inevitability", band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Desk setups — workspaces befitting a legend
+// ---------------------------------------------------------------------------
+const LEGENDS_DESK_SETUPS: TraitPool = [
+  // Common (21)
+  { value: "a map of territories not yet taken",                        band: "Common" },
+  { value: "a stack of scrolls nobody else can read",                   band: "Common" },
+  { value: "three unfinished inventions and a globe",                   band: "Common" },
+  { value: "a single candle and an unfinished manuscript",              band: "Common" },
+  { value: "a compass pointing somewhere unconventional",               band: "Common" },
+  { value: "a half-completed philosophy treatise",                      band: "Common" },
+  { value: "a clay tablet covered in dense annotations",                band: "Common" },
+  { value: "a war table with miniature figurines, very serious",        band: "Common" },
+  { value: "scattered star charts and an astrolabe",                    band: "Common" },
+  { value: "a growing pile of unanswered dispatches",                   band: "Common" },
+  { value: "a mirror angled to reflect power",                          band: "Common" },
+  { value: "a quill worn to a nub and three backup quills",             band: "Common" },
+  { value: "a terrarium of sand labelled 'future territory'",          band: "Common" },
+  { value: "an anatomical diagram pinned to the wall, annotated",      band: "Common" },
+  { value: "a pile of expense reports labelled 'campaign costs'",      band: "Common" },
+  { value: "a sundial they check more than anyone deems necessary",    band: "Common" },
+  { value: "a hand-drawn org chart with too many levels",              band: "Common" },
+  { value: "a bowl of wax seals for correspondence they haven't sent", band: "Common" },
+  { value: "two candles and a copy of The Art of War, tabbed heavily", band: "Common" },
+  { value: "a portrait of themselves commissioned last Tuesday",       band: "Common" },
+  { value: "a stack of unopened enemy negotiations",                   band: "Common" },
+
+  // Uncommon (12)
+  { value: "a battle plan for the quarterly review, illustrated",      band: "Uncommon" },
+  { value: "seventeen drafts of the same edict, all slightly different", band: "Uncommon" },
+  { value: "a handwritten list of grudges, cross-referenced",          band: "Uncommon" },
+  { value: "a moleskine full of observations nobody asked for",         band: "Uncommon" },
+  { value: "a magnetic lodestone and navigational tools nobody can use", band: "Uncommon" },
+  { value: "a periodic table sketched by hand with personal notes",    band: "Uncommon" },
+  { value: "a complete diagram of the known universe, slightly wrong", band: "Uncommon" },
+  { value: "a chipped goblet inherited from a predecessor",            band: "Uncommon" },
+  { value: "a collection of bones labelled 'research samples'",        band: "Uncommon" },
+  { value: "a second desk facing theirs, unoccupied, unexplained",    band: "Uncommon" },
+  { value: "an inkwell so large it suggests ambitions",                band: "Uncommon" },
+  { value: "a laurel wreath draped over the monitor stand",            band: "Uncommon" },
+
+  // Rare (7)
+  { value: "a diorama of their greatest campaign, accurately scaled",  band: "Rare" },
+  { value: "a nine-scroll war correspondence rack",                    band: "Rare" },
+  { value: "a human skull used as a paperweight, no explanation given", band: "Rare" },
+  { value: "a framed cease-and-desist from a rival empire, displayed with pride", band: "Rare" },
+  { value: "a full wall-map annotated with 'mine', 'soon', and 'definitely mine'", band: "Rare" },
+  { value: "a collection of seventeen identical styluses",             band: "Rare" },
+  { value: "a throne adapted, with marginal success, to function as an office chair", band: "Rare" },
+
+  // Legendary (3)
+  { value: "a potted fig that has outlived three empires and a merger", band: "Legendary" },
+  { value: "forty unwashed goblets in a stable equilibrium",           band: "Legendary" },
+  { value: "a chair that creaks prophetically",                        band: "Legendary" },
+
+  // Mythic (2)
+  { value: "a full-scale model of the Colosseum, built during a slow Q3", band: "Mythic" },
+  { value: "a second throne facing theirs, always occupied, never explained", band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Habits
+// ---------------------------------------------------------------------------
+const LEGENDS_HABITS: TraitPool = [
+  // Common (21)
+  { value: "rewrites team decisions and claims it was always the plan", band: "Common" },
+  { value: "arrives two hours late and immediately starts conquering", band: "Common" },
+  { value: "invents something groundbreaking and tells no one",        band: "Common" },
+  { value: "gives unsolicited strategic advice during standup",        band: "Common" },
+  { value: "cc's the entire organisation on every dispatch",           band: "Common" },
+  { value: "asks clarifying questions until the meeting ends itself",  band: "Common" },
+  { value: "disappears mid-project and returns with a better plan",    band: "Common" },
+  { value: "takes detailed field notes and never shares them",         band: "Common" },
+  { value: "reorganises the shared drive without warning",             band: "Common" },
+  { value: "insists on peer review for every single discovery",        band: "Common" },
+  { value: "draws geometric proofs in the margins of unrelated documents", band: "Common" },
+  { value: "sends follow-up scrolls at midnight",                      band: "Common" },
+  { value: "quotes themselves at length in team communications",       band: "Common" },
+  { value: "recalibrates everyone else's estimates downward",          band: "Common" },
+  { value: "schedules one-to-ones but only discusses legacy",          band: "Common" },
+  { value: "brings maps to meetings that do not require maps",         band: "Common" },
+  { value: "overcomplicates solutions that were already working",      band: "Common" },
+  { value: "names every project after themselves",                     band: "Common" },
+  { value: "delegates aggressively, then checks everything anyway",    band: "Common" },
+  { value: "annotates other people's documents without permission",    band: "Common" },
+  { value: "starts every meeting with a brief historical context",     band: "Common" },
+
+  // Uncommon (12)
+  { value: "documents everything as if for a future biographer",       band: "Uncommon" },
+  { value: "speaks only in rhetorical questions after 3pm",            band: "Uncommon" },
+  { value: "pivots the entire project direction after one bad meeting", band: "Uncommon" },
+  { value: "leaves cryptic notes on the whiteboard that nobody erases", band: "Uncommon" },
+  { value: "reinterprets the brief as an opportunity for revolution",  band: "Uncommon" },
+  { value: "quietly wins every argument by waiting until everyone leaves", band: "Uncommon" },
+  { value: "proposes renaming things after their own victories",       band: "Uncommon" },
+  { value: "schedules retrospectives that turn into philosophical crises", band: "Uncommon" },
+  { value: "treats every obstacle as a siege to be waited out",        band: "Uncommon" },
+  { value: "has a contingency plan for the contingency plan",          band: "Uncommon" },
+  { value: "writes the performance review before the performance has occurred", band: "Uncommon" },
+  { value: "claims all good ideas were their idea, in writing",        band: "Uncommon" },
+
+  // Rare (7)
+  { value: "has conquered this meeting and three others simultaneously", band: "Rare" },
+  { value: "rewrites the org chart after every major battle",          band: "Rare" },
+  { value: "insists the current approach is how Rome did it",          band: "Rare" },
+  { value: "leaves for 'a long walk' and returns having changed history", band: "Rare" },
+  { value: "micromanages the catapult trajectory",                     band: "Rare" },
+  { value: "creates a new measurement unit named after themselves",    band: "Rare" },
+  { value: "schedules recurring one-to-ones with the concept of time", band: "Rare" },
+
+  // Legendary (3)
+  { value: "has already predicted this meeting's outcome",             band: "Legendary" },
+  { value: "silently calculates the load-bearing potential of every room entered", band: "Legendary" },
+  { value: "reorganises empires the way others reorganise their inbox", band: "Legendary" },
+
+  // Mythic (2)
+  { value: "exists simultaneously in three historical eras and one sprint", band: "Mythic" },
+  { value: "answers every question with the question it should have been", band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Coffee rituals — historically adapted beverages
+// ---------------------------------------------------------------------------
+const LEGENDS_COFFEE_RITUALS: TraitPool = [
+  // Common (21)
+  { value: "mead, always mead",                                         band: "Common" },
+  { value: "wine, for medicinal reasons",                               band: "Common" },
+  { value: "hot water with herbs, very serious about it",               band: "Common" },
+  { value: "whatever the troops are having",                            band: "Common" },
+  { value: "strong black tea, imported at great expense",               band: "Common" },
+  { value: "goat milk, warm",                                           band: "Common" },
+  { value: "river water, boiled, labelled 'artisanal'",                 band: "Common" },
+  { value: "a fermented grain beverage nobody else will touch",         band: "Common" },
+  { value: "nothing — survives on rhetoric alone",                      band: "Common" },
+  { value: "whatever is available in the occupied territory",           band: "Common" },
+  { value: "honey dissolved in water, slowly, contemplatively",         band: "Common" },
+  { value: "ale, served at room temperature, no complaints",            band: "Common" },
+  { value: "a broth of unspecified origin, consumed without emotion",   band: "Common" },
+  { value: "juice of pressed grapes, unfermented, on principle",        band: "Common" },
+  { value: "bark tea with documented health properties",                band: "Common" },
+  { value: "a beverage of their own invention, untested on others",     band: "Common" },
+  { value: "water from a specific well, on principle",                  band: "Common" },
+  { value: "pomegranate juice, three cups minimum",                     band: "Common" },
+  { value: "nothing before the first victory of the day",               band: "Common" },
+  { value: "a tincture described only as 'necessary'",                  band: "Common" },
+  { value: "imported spiced milk, very particular about temperature",   band: "Common" },
+
+  // Uncommon (12)
+  { value: "the same beverage every day, without variation, without explanation", band: "Uncommon" },
+  { value: "a complex ritual involving three vessels and a sunrise",    band: "Uncommon" },
+  { value: "whatever the philosopher brought today",                    band: "Uncommon" },
+  { value: "wine cut with seawater, an acquired taste",                 band: "Uncommon" },
+  { value: "a fermented drink they claim cures everything",             band: "Uncommon" },
+  { value: "nothing — fasting for strategic clarity",                   band: "Uncommon" },
+  { value: "a private reserve nobody else has access to",               band: "Uncommon" },
+  { value: "warm broth consumed while reviewing battle plans",          band: "Uncommon" },
+  { value: "an experimental compound that may or may not be poison",    band: "Uncommon" },
+  { value: "spring water collected at the solstice",                    band: "Uncommon" },
+  { value: "the conqueror's blend — strong, bitter, taken standing",    band: "Uncommon" },
+  { value: "a daily dose of vinegar, for the circulation",              band: "Uncommon" },
+
+  // Rare (7)
+  { value: "hemlock-adjacent, a complex relationship",                  band: "Rare" },
+  { value: "nothing before noon, then everything",                      band: "Rare" },
+  { value: "a beverage so classified even the cup is redacted",         band: "Rare" },
+  { value: "tears of a defeated rival, allegedly",                      band: "Rare" },
+  { value: "an alchemical tincture not yet peer-reviewed",              band: "Rare" },
+  { value: "the same thing Julius Caesar ordered, out of spite",        band: "Rare" },
+  { value: "survival on ambition and bad posture alone",                band: "Rare" },
+
+  // Legendary (3)
+  { value: "they have not drunk anything in two thousand years and seem fine", band: "Legendary" },
+  { value: "a beverage invented specifically to intimidate",            band: "Legendary" },
+  { value: "the first sip of every morning taken in complete silence, in armour", band: "Legendary" },
+
+  // Mythic (2)
+  { value: "nothing — they sustain themselves entirely on legacy",      band: "Mythic" },
+  { value: "a liquid so rare it has not been catalogued by science",    band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Meeting energy
+// ---------------------------------------------------------------------------
+const LEGENDS_MEETING_ENERGY: TraitPool = [
+  // Common (21)
+  { value: "has already left for Elba",                                 band: "Common" },
+  { value: "arrived 2,000 years early and is still waiting",           band: "Common" },
+  { value: "has conquered this meeting and three others today",         band: "Common" },
+  { value: "nodding slowly, planning something",                        band: "Common" },
+  { value: "the only one who read the pre-read, mentions it",           band: "Common" },
+  { value: "politely rewrites the agenda in real time",                 band: "Common" },
+  { value: "silent but clearly the most dangerous person in the room",  band: "Common" },
+  { value: "takes notes on a scroll, in Latin, unlabelled",            band: "Common" },
+  { value: "asks one question that derails everything for forty minutes", band: "Common" },
+  { value: "the only one with a timeline that extends past Q4",         band: "Common" },
+  { value: "has predicted the outcome and is disappointed anyway",      band: "Common" },
+  { value: "contributes thoughtfully, then turns everything to strategy", band: "Common" },
+  { value: "arrives with prepared remarks that were not requested",     band: "Common" },
+  { value: "keeps bringing the conversation back to first principles",  band: "Common" },
+  { value: "visibly calculating the structural weaknesses of the room", band: "Common" },
+  { value: "speaks last, which turns out to be most important",         band: "Common" },
+  { value: "asks follow-up questions that nobody can answer",           band: "Common" },
+  { value: "has already decided the outcome",                           band: "Common" },
+  { value: "brings a map to a meeting that needed a spreadsheet",       band: "Common" },
+  { value: "very calm, which is somehow alarming",                      band: "Common" },
+  { value: "exits before the action items are assigned",                band: "Common" },
+
+  // Uncommon (12)
+  { value: "takes detailed notes, never shares them",                   band: "Uncommon" },
+  { value: "interprets every agenda item as a strategic opportunity",   band: "Uncommon" },
+  { value: "has already sent a follow-up scroll before the meeting ends", band: "Uncommon" },
+  { value: "arrives in full armour, declines to explain",               band: "Uncommon" },
+  { value: "reframes every problem as a siege",                         band: "Uncommon" },
+  { value: "delivers a monologue before the meeting has technically started", band: "Uncommon" },
+  { value: "the kind of calm that has won and lost empires",            band: "Uncommon" },
+  { value: "causes a philosophical crisis in the AOB section",          band: "Uncommon" },
+  { value: "declares the meeting complete before the host does",        band: "Uncommon" },
+  { value: "redirects every question back to the asker",                band: "Uncommon" },
+  { value: "uses historical precedent to win every point",              band: "Uncommon" },
+  { value: "listens with the focus of someone composing a dispatch",    band: "Uncommon" },
+
+  // Rare (7)
+  { value: "has already conquered the meeting's subject matter, literally", band: "Rare" },
+  { value: "corrects the meeting title in the calendar invite",         band: "Rare" },
+  { value: "completes the objectives before anyone else sits down",     band: "Rare" },
+  { value: "delivers a TED talk during what was supposed to be a standup", band: "Rare" },
+  { value: "nominates themselves as chair mid-meeting",                 band: "Rare" },
+  { value: "declares the meeting adjourned at a tactically perfect moment", band: "Rare" },
+  { value: "wins the meeting without speaking",                         band: "Rare" },
+
+  // Legendary (3)
+  { value: "has conquered this meeting, the previous meeting, and the one after", band: "Legendary" },
+  { value: "the meeting cannot begin until they have decided it will",  band: "Legendary" },
+  { value: "leaves the room subtly different",                          band: "Legendary" },
+
+  // Mythic (2)
+  { value: "is simultaneously present and historically inevitable",     band: "Mythic" },
+  { value: "the meeting ends when they choose, and not before",         band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Passive-aggressive sign-offs (email / scroll equivalents)
+// ---------------------------------------------------------------------------
+const LEGENDS_PASSIVE_AGGRESSIVE: TraitPool = [
+  // Common (21)
+  { value: "per my last scroll",                                        band: "Common" },
+  { value: "as I said before the fall of Rome",                        band: "Common" },
+  { value: "noted — though history will judge differently",             band: "Common" },
+  { value: "I'll defer to the conqueror on this one",                   band: "Common" },
+  { value: "as previously inscribed",                                   band: "Common" },
+  { value: "per the edict you seem to have misplaced",                  band: "Common" },
+  { value: "circling back on my earlier dispatch",                      band: "Common" },
+  { value: "following up on my last seventeen questions",               band: "Common" },
+  { value: "as Aristotle said — and he was right",                     band: "Common" },
+  { value: "kindly refer to the original papyrus",                      band: "Common" },
+  { value: "the record shows I raised this concern",                    band: "Common" },
+  { value: "to clarify — this was not what I proposed",                 band: "Common" },
+  { value: "history has already answered this question",                band: "Common" },
+  { value: "I remain, as always, unconvinced",                          band: "Common" },
+  { value: "per my previous three chapters on this subject",            band: "Common" },
+  { value: "awaiting your reply before the next campaign season",       band: "Common" },
+  { value: "I see this has not been actioned",                          band: "Common" },
+  { value: "as outlined in the conquest brief",                         band: "Common" },
+  { value: "this is not what I had inscribed in the tablet",            band: "Common" },
+  { value: "see attached — the original plan, which was not followed",  band: "Common" },
+  { value: "your earliest convenience would be appreciated",            band: "Common" },
+
+  // Uncommon (12)
+  { value: "as I stated clearly during the Gallic campaign",            band: "Uncommon" },
+  { value: "I trust this clears up any confusion you may have introduced", band: "Uncommon" },
+  { value: "looping in the empire, for visibility",                     band: "Uncommon" },
+  { value: "please find attached the diagram you chose to ignore",      band: "Uncommon" },
+  { value: "moving this forward, as I had hoped to do weeks ago",       band: "Uncommon" },
+  { value: "the theory was correct — the execution was yours",          band: "Uncommon" },
+  { value: "cc'ing the Senate for awareness",                           band: "Uncommon" },
+  { value: "to reiterate — and I cannot stress this enough",            band: "Uncommon" },
+  { value: "I'll note my objection here for the historical record",     band: "Uncommon" },
+  { value: "setting a reminder for two centuries from now",             band: "Uncommon" },
+  { value: "actioning this myself, as previously offered",              band: "Uncommon" },
+  { value: "I've updated the scroll to reflect what actually happened", band: "Uncommon" },
+
+  // Rare (7)
+  { value: "filed under: things I said would happen",                   band: "Rare" },
+  { value: "I'll await confirmation from your toga's sleeve",           band: "Rare" },
+  { value: "adding this to my upcoming biography, chapter eleven",      band: "Rare" },
+  { value: "for future reference — this is why you consult Sun Tzu",    band: "Rare" },
+  { value: "the gods have been notified",                               band: "Rare" },
+  { value: "I have made a note in the permanent record of history",     band: "Rare" },
+  { value: "per my earlier prophecy",                                   band: "Rare" },
+
+  // Legendary (3)
+  { value: "et tu?",                                                    band: "Legendary" },
+  { value: "I will let posterity be the judge",                         band: "Legendary" },
+  { value: "forwarding this to the next civilisation for review",       band: "Legendary" },
+
+  // Mythic (2)
+  { value: "the record of history has been updated accordingly",        band: "Mythic" },
+  { value: "this conversation will be taught in schools",               band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Physical height
+// ---------------------------------------------------------------------------
+const LEGENDS_PHYSICAL_HEIGHT: TraitPool = [
+  // Common (21)
+  { value: "surprisingly short for the legend",                         band: "Common" },
+  { value: "of commanding stature",                                     band: "Common" },
+  { value: "built for the ages",                                        band: "Common" },
+  { value: "smaller than the statues suggest",                          band: "Common" },
+  { value: "average height, insists otherwise",                         band: "Common" },
+  { value: "tall enough to see the whole battlefield",                  band: "Common" },
+  { value: "of modest build, compensating historically",                band: "Common" },
+  { value: "compact and efficient",                                     band: "Common" },
+  { value: "imposing from across the forum",                            band: "Common" },
+  { value: "the height of someone who has never lost an argument",      band: "Common" },
+  { value: "wiry, which everyone underestimates",                       band: "Common" },
+  { value: "taller than you'd expect",                                  band: "Common" },
+  { value: "shorter than the monuments",                                band: "Common" },
+  { value: "precisely the right height for their ambitions",            band: "Common" },
+  { value: "unremarkable stature, remarkable everything else",          band: "Common" },
+  { value: "the height of someone planning something",                  band: "Common" },
+  { value: "broad-shouldered, narrow-minded about compromise",          band: "Common" },
+  { value: "slight but with the gravity of someone much larger",        band: "Common" },
+  { value: "solidly built for a philosopher",                           band: "Common" },
+  { value: "medium height, legendary reach",                            band: "Common" },
+  { value: "standing at exactly the height their armour suggests",      band: "Common" },
+
+  // Uncommon (12)
+  { value: "taller than Rome, shorter than the myth",                   band: "Uncommon" },
+  { value: "exactly the height depicted in the famous portrait",        band: "Uncommon" },
+  { value: "the height of controlled fury",                             band: "Uncommon" },
+  { value: "built like an obelisk",                                     band: "Uncommon" },
+  { value: "the same height as their rival, which they dispute",        band: "Uncommon" },
+  { value: "taller in the official records",                            band: "Uncommon" },
+  { value: "apparently taller on horseback, always on horseback",       band: "Uncommon" },
+  { value: "the stature of someone who has written a treatise on stature", band: "Uncommon" },
+  { value: "of uncertain height — the accounts differ",                 band: "Uncommon" },
+  { value: "precisely as tall as necessary",                            band: "Uncommon" },
+  { value: "a little shorter than expected, infinitely more dangerous", band: "Uncommon" },
+  { value: "built for endurance, not altitude",                         band: "Uncommon" },
+
+  // Rare (7)
+  { value: "permanently mid-conquest",                                  band: "Rare" },
+  { value: "taller in four dimensions",                                 band: "Rare" },
+  { value: "the height that rewrote trade routes",                      band: "Rare" },
+  { value: "the exact height required to make others uncomfortable",    band: "Rare" },
+  { value: "indeterminate — the toga compensates",                      band: "Rare" },
+  { value: "the height of someone who has never not been in the room",  band: "Rare" },
+  { value: "larger than life, and only slightly smaller than legend",   band: "Rare" },
+
+  // Legendary (3)
+  { value: "the kind of tall that makes rooms rearrange themselves",    band: "Legendary" },
+  { value: "described differently in every historical source",          band: "Legendary" },
+  { value: "an expression that resolves differently depending on era",  band: "Legendary" },
+
+  // Mythic (2)
+  { value: "a physical presence that predates the building",            band: "Mythic" },
+  { value: "whatever height history has decided, plus two centimetres", band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Physical accessory
+// ---------------------------------------------------------------------------
+const LEGENDS_PHYSICAL_ACCESSORY: TraitPool = [
+  // Common (21)
+  { value: "a laurel wreath worn unironically",                         band: "Common" },
+  { value: "a compass that may or may not be correct",                  band: "Common" },
+  { value: "a quill that somehow still works",                          band: "Common" },
+  { value: "a battle plan for the quarterly review",                    band: "Common" },
+  { value: "a lanyard with an expired empire badge",                    band: "Common" },
+  { value: "a scroll that has been referenced but never finished",      band: "Common" },
+  { value: "a signet ring engraved with a symbol nobody explains",      band: "Common" },
+  { value: "a small knife worn professionally",                         band: "Common" },
+  { value: "a hand-drawn star map, personal use only",                  band: "Common" },
+  { value: "a measuring instrument of obscure purpose",                 band: "Common" },
+  { value: "a wax tablet covered in today's decisive thoughts",         band: "Common" },
+  { value: "a short sword worn like a letter opener",                   band: "Common" },
+  { value: "a copy of The Prince tucked into their belt",               band: "Common" },
+  { value: "a philosophical treatise disguised as a to-do list",        band: "Common" },
+  { value: "a small mirror for checking the correct expression",        band: "Common" },
+  { value: "a water flask from a country they have since acquired",     band: "Common" },
+  { value: "a satchel of very old notes",                               band: "Common" },
+  { value: "a token from a battle everyone else has forgotten",         band: "Common" },
+  { value: "a bag of sand from a place they are proud of visiting",     band: "Common" },
+  { value: "a worn copy of their own published work",                   band: "Common" },
+  { value: "a portable writing kit for important thoughts",             band: "Common" },
+
+  // Uncommon (12)
+  { value: "an abacus worn on the belt like a weapon",                  band: "Uncommon" },
+  { value: "a suspicious apple",                                        band: "Uncommon" },
+  { value: "a walking staff with carved annotations from every country visited", band: "Uncommon" },
+  { value: "a set of calipers from an ongoing unfinished project",      band: "Uncommon" },
+  { value: "a crown kept in a bag for strategic use",                   band: "Uncommon" },
+  { value: "a clay seal from an empire that technically no longer exists", band: "Uncommon" },
+  { value: "a single feather from a bird nobody can name",              band: "Uncommon" },
+  { value: "a polished obsidian disc used for reflection",              band: "Uncommon" },
+  { value: "a letter of introduction from themselves, to themselves",   band: "Uncommon" },
+  { value: "a trophy from a debate nobody else remembers winning",      band: "Uncommon" },
+  { value: "a sundial small enough to check indoors",                   band: "Uncommon" },
+  { value: "a spare toga rolled and strapped to the satchel",           band: "Uncommon" },
+
+  // Rare (7)
+  { value: "a scroll labelled 'not for sharing'",                       band: "Rare" },
+  { value: "a full set of surveying tools for unexpected territory",    band: "Rare" },
+  { value: "a wax tablet with things they plan to say, pre-written",    band: "Rare" },
+  { value: "a brooch engraved with a battle that historians dispute",   band: "Rare" },
+  { value: "a small but functional trebuchet model, decorative",        band: "Rare" },
+  { value: "a map folded to show only the territories they control",    band: "Rare" },
+  { value: "a list of names, growing",                                  band: "Rare" },
+
+  // Legendary (3)
+  { value: "a lanyard with access to seventeen restricted areas across three empires", band: "Legendary" },
+  { value: "an ID badge from a civilisation that no longer exists",     band: "Legendary" },
+  { value: "a compass displaying a direction no cartographer has agreed on", band: "Legendary" },
+
+  // Mythic (2)
+  { value: "the original thing — the one in the museums is a reproduction", band: "Mythic" },
+  { value: "an object whose purpose has been the subject of three academic papers", band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Physical expression
+// ---------------------------------------------------------------------------
+const LEGENDS_PHYSICAL_EXPRESSION: TraitPool = [
+  // Common (21)
+  { value: "the look of someone who has already won",                   band: "Common" },
+  { value: "quietly disappointed in everyone",                          band: "Common" },
+  { value: "serene but alarming",                                       band: "Common" },
+  { value: "calculating the odds",                                      band: "Common" },
+  { value: "polite, in the way only the genuinely dangerous are",       band: "Common" },
+  { value: "the composed look of someone minuting a siege",             band: "Common" },
+  { value: "mild disapproval, historically justified",                  band: "Common" },
+  { value: "the face of someone about to send a very long dispatch",    band: "Common" },
+  { value: "patient disagreement in four languages",                    band: "Common" },
+  { value: "the slow blink of someone who has heard this argument before", band: "Common" },
+  { value: "controlled impatience with a diplomatic veneer",            band: "Common" },
+  { value: "faint, practised magnanimity",                              band: "Common" },
+  { value: "professional blankness masking complete certainty",         band: "Common" },
+  { value: "cautious optimism from someone who has seen empires fall",  band: "Common" },
+  { value: "restrained weariness from someone on their third dynasty",  band: "Common" },
+  { value: "the neutral face of someone rewriting the constitution later", band: "Common" },
+  { value: "mid-conquest glaze",                                        band: "Common" },
+  { value: "the quiet resolve of someone with a plan B through Z",      band: "Common" },
+  { value: "a measured nod that commits to nothing",                    band: "Common" },
+  { value: "the pinched look of someone about to cite precedent",       band: "Common" },
+  { value: "the faint smirk of someone sitting on a devastating letter", band: "Common" },
+
+  // Uncommon (12)
+  { value: "the look of someone who has read every book on this",       band: "Uncommon" },
+  { value: "the smile of someone who has mentally conquered the room",  band: "Uncommon" },
+  { value: "the thousand-year stare of a completed campaign",           band: "Uncommon" },
+  { value: "eyes that have seen the fall of three civilisations",       band: "Uncommon" },
+  { value: "the focused intensity of someone drafting a legacy",        band: "Uncommon" },
+  { value: "the vacant stare of someone recalculating empire logistics", band: "Uncommon" },
+  { value: "the haunted focus of someone reconciling a map by hand",    band: "Uncommon" },
+  { value: "the tight smile of someone who has been right since 200BC", band: "Uncommon" },
+  { value: "the polite grimace of someone reviewing a rival's battle memoir", band: "Uncommon" },
+  { value: "the carefully neutral face of someone planning something large", band: "Uncommon" },
+  { value: "the look of someone who did not start this but will finish it", band: "Uncommon" },
+  { value: "the expression of someone who predicted this outcome",      band: "Uncommon" },
+
+  // Rare (7)
+  { value: "permanently mid-speech",                                    band: "Rare" },
+  { value: "frozen in the famous portrait expression since the sitting", band: "Rare" },
+  { value: "the face that launched administrative reform",              band: "Rare" },
+  { value: "the expression people study for clues",                     band: "Rare" },
+  { value: "the look of someone whose name is already a monument",      band: "Rare" },
+  { value: "an expression that resolves differently depending on which account you read", band: "Rare" },
+  { value: "visibly composing a biography entry",                       band: "Rare" },
+
+  // Legendary (3)
+  { value: "wears nineteen subtly different versions of the same certainty", band: "Legendary" },
+  { value: "the expression that ended, started, and rerouted three wars", band: "Legendary" },
+  { value: "an expression that historians have argued about for centuries", band: "Legendary" },
+
+  // Mythic (2)
+  { value: "indescribable — the accounts all say something different",  band: "Mythic" },
+  { value: "an expression that would look wrong on anyone else",        band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Physical material (what they wear)
+// ---------------------------------------------------------------------------
+const LEGENDS_PHYSICAL_MATERIAL: TraitPool = [
+  // Common (21)
+  { value: "a toga, correctly draped",                                  band: "Common" },
+  { value: "battle-worn armour that still fits",                        band: "Common" },
+  { value: "a lab coat with ink stains, not chemicals",                 band: "Common" },
+  { value: "a painter's smock, technically always 'working'",           band: "Common" },
+  { value: "chain mail that is somehow still sharp",                    band: "Common" },
+  { value: "flowing robes of a historically significant colour",        band: "Common" },
+  { value: "a simple tunic worn with extraordinary authority",          band: "Common" },
+  { value: "leather sandals and a linen chiton, immovably",             band: "Common" },
+  { value: "a floor-length robe with an ambitious belt",                band: "Common" },
+  { value: "sensible armour over a comfortable underlayer",             band: "Common" },
+  { value: "a cloak that has been to more countries than most people",  band: "Common" },
+  { value: "a field commander's tunic, slightly too formal for the office", band: "Common" },
+  { value: "a garment that implies both power and discomfort",          band: "Common" },
+  { value: "a layered robe ensemble chosen for maximum gravitas",       band: "Common" },
+  { value: "an outfit that reappears in exactly three museum paintings", band: "Common" },
+  { value: "the same outfit from the famous portrait, worn daily",      band: "Common" },
+  { value: "practical travelling clothes, inexplicably regal",          band: "Common" },
+  { value: "a leather vest over a linen shirt, age-appropriate armour", band: "Common" },
+  { value: "a wool garment that has somehow lasted two millennia",      band: "Common" },
+  { value: "silk robes that say 'I have won trade negotiations'",       band: "Common" },
+  { value: "an outfit designed to be painted in",                       band: "Common" },
+
+  // Uncommon (12)
+  { value: "a toga wider than any toga worn after 44BC",                band: "Uncommon" },
+  { value: "a breastplate worn inside, as a statement",                 band: "Uncommon" },
+  { value: "a fur-lined military greatcoat, wrong climate, not adjusted", band: "Uncommon" },
+  { value: "a waistcoat made from conquered territory fabric",          band: "Uncommon" },
+  { value: "robes with a hem embroidered with unresolved questions",    band: "Uncommon" },
+  { value: "an outfit three sizes too large, worn with complete confidence", band: "Uncommon" },
+  { value: "a signet ring worn on every available finger",              band: "Uncommon" },
+  { value: "the blue cloak — the one the historians mention",           band: "Uncommon" },
+  { value: "a practical disguise worn with impractical accessories",    band: "Uncommon" },
+  { value: "court robes worn in the field, unironically",               band: "Uncommon" },
+  { value: "garments embroidered with a complete list of victories",    band: "Uncommon" },
+  { value: "spectacles that may have been invented just for this",      band: "Uncommon" },
+
+  // Rare (7)
+  { value: "an outfit that has been misidentified by three different museums", band: "Rare" },
+  { value: "armour that has fit perfectly for 2,300 years",             band: "Rare" },
+  { value: "a garment that technically makes them Head of State",       band: "Rare" },
+  { value: "the toga of someone who has annexed a continent before breakfast", band: "Rare" },
+  { value: "a hand-knitted item depicting their own face, worn seriously", band: "Rare" },
+  { value: "entirely conference swag from civilisations that no longer exist", band: "Rare" },
+  { value: "a single cufflink that predates most languages",            band: "Rare" },
+
+  // Legendary (3)
+  { value: "a laurel wreath that has not technically been removed since the ceremony", band: "Legendary" },
+  { value: "dressed entirely as depicted in the most flattering source", band: "Legendary" },
+  { value: "a garment described differently in every primary source",   band: "Legendary" },
+
+  // Mythic (2)
+  { value: "whatever was in the famous painting — recreated exactly, daily", band: "Mythic" },
+  { value: "a hand-stitched map of the known world, worn as a cloak",   band: "Mythic" },
+];
+
+// ---------------------------------------------------------------------------
+// Theme colours — historically inspired palette
+// ---------------------------------------------------------------------------
+const LEGENDS_THEME_PRIMARY: TraitPool = [
+  { value: "#6B3FA0", band: "Common" },      // Tyrian purple — imperial
+  { value: "#8B1C2B", band: "Common" },      // legion crimson
+  { value: "#7C5E3C", band: "Common" },      // ancient bronze
+  { value: "#C8980A", band: "Common" },      // Egyptian gold
+  { value: "#2B4E8C", band: "Common" },      // lapis lazuli blue
+  { value: "#5C4033", band: "Common" },      // papyrus brown
+  { value: "#3D2B1F", band: "Common" },      // obsidian
+  { value: "#6B4F3A", band: "Uncommon" },    // aged parchment tan
+  { value: "#4A3728", band: "Uncommon" },    // ancient wood
+  { value: "#7A3B2E", band: "Uncommon" },    // Pompeian red
+  { value: "#2E4B3A", band: "Uncommon" },    // Roman garden green
+  { value: "#A67C52", band: "Rare" },        // aged copper
+  { value: "#C07030", band: "Rare" },        // amber
+  { value: "#1A1A2E", band: "Legendary" },   // midnight empire blue
+  { value: "#D4AF37", band: "Mythic" },      // true gold
+];
+
+const LEGENDS_THEME_ACCENT: TraitPool = [
+  { value: "#E8E0D4", band: "Common" },      // marble white
+  { value: "#C9A96E", band: "Common" },      // parchment
+  { value: "#D4C5A9", band: "Common" },      // aged linen
+  { value: "#B8A99A", band: "Common" },      // dusty stone
+  { value: "#A09070", band: "Common" },      // antique vellum
+  { value: "#8B7355", band: "Common" },      // worn leather
+  { value: "#C8B88A", band: "Common" },      // beeswax cream
+  { value: "#6B7B5C", band: "Uncommon" },    // sage patina
+  { value: "#5A4A3A", band: "Uncommon" },    // dark oak
+  { value: "#7A6B5A", band: "Uncommon" },    // oxidised bronze
+  { value: "#4A5A6A", band: "Uncommon" },    // slate grey
+  { value: "#8B6B4A", band: "Rare" },        // terracotta accent
+  { value: "#D4A855", band: "Rare" },        // gilded highlight
+  { value: "#2A3A2A", band: "Legendary" },   // deep forest verdigris
+  { value: "#FFD700", band: "Mythic" },      // pure gold
+];
+
+// ---------------------------------------------------------------------------
+// Export — same shape as POOLS so the rarity engine can use it unchanged
+// ---------------------------------------------------------------------------
+export const LEGENDS_POOLS: Record<CategoryKey, TraitPool> = {
+  name:                LEGENDS_NAMES,
+  job_title:           LEGENDS_JOB_TITLES,
+  desk_setup:          LEGENDS_DESK_SETUPS,
+  habit:               LEGENDS_HABITS,
+  coffee_ritual:       LEGENDS_COFFEE_RITUALS,
+  meeting_energy:      LEGENDS_MEETING_ENERGY,
+  passive_aggressive:  LEGENDS_PASSIVE_AGGRESSIVE,
+  physical_height:     LEGENDS_PHYSICAL_HEIGHT,
+  physical_accessory:  LEGENDS_PHYSICAL_ACCESSORY,
+  physical_expression: LEGENDS_PHYSICAL_EXPRESSION,
+  physical_material:   LEGENDS_PHYSICAL_MATERIAL,
+  theme_primary:       LEGENDS_THEME_PRIMARY,
+  theme_accent:        LEGENDS_THEME_ACCENT,
+};
