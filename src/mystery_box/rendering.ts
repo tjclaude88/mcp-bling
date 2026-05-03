@@ -72,10 +72,12 @@ export const PARAGRAPH_TEMPLATES: readonly string[] = [
 ];
 
 /** Pick a template uniformly at random and fill its slots from the identity. */
-export function renderParagraph(identity: RolledIdentity, rng: Rng): string {
-  const template = PARAGRAPH_TEMPLATES[
-    Math.floor(rng() * PARAGRAPH_TEMPLATES.length)
-  ]!;
+export function renderParagraph(
+  identity: RolledIdentity,
+  rng: Rng,
+  templates: readonly string[] = PARAGRAPH_TEMPLATES,
+): string {
+  const template = templates[Math.floor(rng() * templates.length)]!;
   const slots: Record<string, string> = {
     name: identity.name,
     job_title: identity.office.job_title,
