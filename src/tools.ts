@@ -2,7 +2,7 @@
 // MCP tool definitions and platform theme generation.
 // Theme helpers are exported so tests can call them directly.
 
-import type { BlingIdentity, RollOutput } from "./types.js";
+import type { BlingIdentity, RollOutput, Variant } from "./types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { writeFile, copyFile, access } from "node:fs/promises";
@@ -24,11 +24,11 @@ let lastRoll: RollOutput | null = null;
  *
  * @param rng - optional deterministic RNG for tests; omit in production.
  */
-export async function rollIdentityHandler(rng?: Rng): Promise<{
+export async function rollIdentityHandler(rng?: Rng, variant: Variant = "wow"): Promise<{
   content: Array<{ type: "text"; text: string }>;
   structuredContent: RollOutput;
 }> {
-  const out = rng ? rollIdentity(rng) : rollIdentity();
+  const out = rng ? rollIdentity(rng, variant) : rollIdentity(Math.random, variant);
   lastRoll = out;
   return {
     content: [{ type: "text" as const, text: JSON.stringify(out, null, 2) }],
@@ -282,35 +282,31 @@ export function generateThemeForPlatform(
  * @param blingPath - Path to the bling.json file to read
  */
 export function registerTools(server: McpServer, blingPath: string): void {
-  // Tool 1: get_identity (modern registerTool, full MCP spec compliance)
-  // outputSchema is intentionally omitted — BlingIdentity is open-shape
-  // (user-defined fields allowed). The SDK leaves structuredContent
-  // as-is when no schema is declared.
+  // Tool 1: get_identity
   server.registerTool(
     "get_identity",
     {
-      title: "Get Bot Identity",
+      title: "Who's My Bot?",
       description:
-        "Get the bot's full identity from bling.json — name, personality, quirks, appearance, and theme colours. Returns the configured identity (hand-written or saved from a roll). Errors if bling.json is missing or invalid.",
+        "Who's your bot? Pull up the full identity — name, personality, quirks, appearance, and theme colours. Returns whatever's configured in bling.json. Errors if bling.json is missing or invalid.",
       inputSchema: {},
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: true,        // reads from disk
+        openWorldHint: true,
       },
     },
     () => getIdentityHandler(blingPath),
   );
 
-  // Tool 2: get_theme_for_platform (modern registerTool)
-  // outputSchema is intentionally omitted — theme shape varies per platform.
+  // Tool 2: get_theme_for_platform
   server.registerTool(
     "get_theme_for_platform",
     {
-      title: "Get Theme for Platform",
+      title: "Style Me Up",
       description:
-        "Get platform-specific styling for the bot. Supported platforms: terminal (returns ANSI escape codes), web (CSS variables), slack, discord, ide. Unknown platforms get the raw hex theme colours.",
+        "Get your bot's colours formatted for a specific platform. Supported: terminal (ANSI codes), web (CSS variables), slack, discord, ide. Unknown platforms get the raw hex colours.",
       inputSchema: {
         platform: z
           .string()
@@ -320,16 +316,13 @@ export function registerTools(server: McpServer, blingPath: string): void {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: true,        // reads from disk
+        openWorldHint: true,
       },
     },
     ({ platform }) => getThemeForPlatformHandler(blingPath, platform),
   );
 
   // Tool 3: roll_identity
-  // Generates a fresh random bot identity from the Mystery Box.
-  // Modifies internal state (the in-memory lastRoll cache) so it is not
-  // readOnly. Does not touch the filesystem or network.
   const rollIdentityOutputSchema = {
     identity: z.object({}).passthrough(),
     rarity: z.object({
@@ -350,24 +343,25 @@ export function registerTools(server: McpServer, blingPath: string): void {
   server.registerTool(
     "roll_identity",
     {
-      title: "Roll a WOW Identity",
+      title: "Spin the Wheel",
       description:
-        "WOW — Weird Office Workers. Roll a fresh random bot identity: a quirky office-worker character with a rarity score and a screenshot-ready share card. Stores the roll for save_last_roll and get_rarity_report.",
-      inputSchema: {},
+        "Give your bot a random identity. Pick a variant: wow (Weird Office Workers — quirky office drones, default) or legends (historical figures in absurd corporate roles). Returns a name, job title, traits, rarity score, and a screenshot-ready share card. Stores the roll for save_last_roll.",
+      inputSchema: {
+        variant: z
+          .enum(["wow", "legends"])
+          .optional()
+          .describe("Which identity pool to use: wow (Weird Office Workers, default) or legends (historical figures in absurd corporate roles)."),
+      },
       outputSchema: rollIdentityOutputSchema,
       annotations: {
-        readOnlyHint: false,        // mutates lastRoll
-        destructiveHint: false,     // no filesystem / external side effects
-        idempotentHint: false,      // each call produces a fresh random roll
-        openWorldHint: false,       // no external systems
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
       },
     },
-    // Wrapper: MCP passes (args, extra) to the callback, but the handler
-    // takes an optional `rng` for tests. Ignore MCP's args in production.
-    // Cast structuredContent because the SDK's callback signature wants an
-    // index-signature type, and RollOutput has known concrete fields.
-    async () => {
-      const out = await rollIdentityHandler();
+    async ({ variant }: { variant?: "wow" | "legends" }) => {
+      const out = await rollIdentityHandler(undefined, variant ?? "wow");
       return {
         content: out.content,
         structuredContent: out.structuredContent as unknown as { [k: string]: unknown },
@@ -376,8 +370,6 @@ export function registerTools(server: McpServer, blingPath: string): void {
   );
 
   // Tool 4: save_last_roll
-  // Writes the most-recent roll's identity to the bling.json path.
-  // Destructive — overwrites the target file (a backup is written first).
   const saveLastRollOutputSchema = {
     ok: z.boolean().optional(),
     written_to: z.string().optional(),
@@ -388,24 +380,22 @@ export function registerTools(server: McpServer, blingPath: string): void {
   server.registerTool(
     "save_last_roll",
     {
-      title: "Save Last WOW Roll to bling.json",
+      title: "Lock It In",
       description:
-        "Persist the most-recent WOW roll by writing it to the configured bling.json path. If a file already exists at that path it is first copied to <path>.bak so user-tuned configs are recoverable. Returns the backup path (or null if the target was new).",
+        "Save the most-recent roll as your bot's permanent identity. Writes to bling.json, backing up any existing config to bling.json.bak first. Returns the backup path (or null if nothing was overwritten).",
       inputSchema: {},
       outputSchema: saveLastRollOutputSchema,
       annotations: {
-        readOnlyHint: false,        // writes to disk
-        destructiveHint: true,      // overwrites an existing file (with backup)
-        idempotentHint: false,      // a second call after a fresh roll writes a different identity
-        openWorldHint: true,        // touches the local filesystem
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: false,
+        openWorldHint: true,
       },
     },
     () => saveLastRollHandler(blingPath),
   );
 
   // Tool 5: get_rarity_report
-  // Returns the formatted share card (lore header, paragraph, lore footer)
-  // for the most-recent roll. Pure read of in-memory state.
   const rarityReportOutputSchema = {
     report: z.string().optional(),
     error: z.string().optional(),
@@ -414,16 +404,16 @@ export function registerTools(server: McpServer, blingPath: string): void {
   server.registerTool(
     "get_rarity_report",
     {
-      title: "Get WOW Rarity Report",
+      title: "Show Off My Card",
       description:
-        "Return the formatted share card (lore header, paragraph, lore footer) for the most-recent WOW roll. The report is plain text designed to be screenshotted directly. Errors if no roll has happened this session.",
+        "Get the formatted share card for the most-recent roll — a plain-text block ready to screenshot and post. Errors if no roll has happened this session.",
       inputSchema: {},
       outputSchema: rarityReportOutputSchema,
       annotations: {
-        readOnlyHint: true,         // pure read of lastRoll
+        readOnlyHint: true,
         destructiveHint: false,
-        idempotentHint: true,       // multiple calls return the same report
-        openWorldHint: false,       // no external systems
+        idempotentHint: true,
+        openWorldHint: false,
       },
     },
     getRarityReportHandler,
