@@ -74,6 +74,9 @@ export type Tier =
   | "C-Suite"
   | "HR Warned Us About";
 
+/** Which character pool to use when rolling a random identity. */
+export type Variant = "wow" | "legends";
+
 /**
  * One option inside a trait pool.
  * `value` is what gets stored on the rolled identity.
