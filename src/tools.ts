@@ -294,7 +294,7 @@ export function registerTools(server: McpServer, blingPath: string): void {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: true,
+        openWorldHint: false,
       },
     },
     () => getIdentityHandler(blingPath),
@@ -316,7 +316,7 @@ export function registerTools(server: McpServer, blingPath: string): void {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: true,
+        openWorldHint: false,
       },
     },
     ({ platform }) => getThemeForPlatformHandler(blingPath, platform),
@@ -360,7 +360,7 @@ export function registerTools(server: McpServer, blingPath: string): void {
         openWorldHint: false,
       },
     },
-    async ({ variant }: { variant?: "wow" | "legends" }) => {
+    async ({ variant }: { variant?: Variant }) => {
       const out = await rollIdentityHandler(undefined, variant ?? "wow");
       return {
         content: out.content,
@@ -382,7 +382,7 @@ export function registerTools(server: McpServer, blingPath: string): void {
     {
       title: "Lock It In",
       description:
-        "Save the most-recent roll as your bot's permanent identity. Writes to bling.json, backing up any existing config to bling.json.bak first. Returns the backup path (or null if nothing was overwritten).",
+        "Save the most-recent roll as your bot's permanent identity. Errors if no roll has happened this session — call roll_identity first. Writes to bling.json, backing up any existing config to bling.json.bak first. Returns the backup path (or null if nothing was overwritten).",
       inputSchema: {},
       outputSchema: saveLastRollOutputSchema,
       annotations: {
