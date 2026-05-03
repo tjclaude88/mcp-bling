@@ -1,28 +1,29 @@
-# Bling Bag — MCP Server for Bot Identity & Visual Styling
+# Bling Bag
 
-> One identity, many surfaces. Give your AI agent a name, a personality, a look,
-> and a quirky office-worker backstory it can present consistently across
-> Claude Code, Claude Desktop, IDE plugins, terminals, web apps, Slack, and Discord.
+> Give your bot an identity.
 
-**Status:** Working MVP. 5 MCP tools, 13 trait pools (465 weighted entries),
-full rarity engine. 94/94 tests passing.
+Your bot has a name. Now give it a personality, a look, and a backstory.
+
+Roll the wheel and see what you get — or write your own in a `bling.json` file.
+
+[![npm version](https://img.shields.io/npm/v/bling-bag)](https://www.npmjs.com/package/bling-bag)
+[![Glama](https://glama.ai/mcp/servers/tjclaude88/mcp-bling/badge)](https://glama.ai/mcp/servers/tjclaude88/mcp-bling)
 
 ---
 
-## What this MCP gives an agent
+## What you get
 
-Five tools, grouped into two halves:
+Five MCP tools and two identity pools:
 
-### Identity & styling (read your configured bot)
+### WOW — Weird Office Workers
 
-- **`get_identity`** — returns the bot's full identity (name, personality, appearance, theme colours)
-- **`get_theme_for_platform`** — returns platform-formatted styling (ANSI codes, CSS variables, Slack/Discord embed colours, etc.)
+Roll a random quirky office-worker bot: name, job title, desk setup, habits, coffee ritual, and a screenshot-ready share card. 99/99 tests, full rarity engine, 13 weighted trait pools.
 
-### WOW — Weird Office Workers (random identity generator)
+### Legends — Historical Figures
 
-- **`roll_identity`** — rolls a fresh random office-worker character (one of 13 traits drawn from weighted pools, scored for rarity, framed in a screenshot-ready share card)
-- **`get_rarity_report`** — returns the formatted share card (header + paragraph + footer) for the most-recent roll
-- **`save_last_roll`** — persists the most-recent roll as the bot's permanent identity (`bling.json`), with automatic backup of any existing config
+Same engine, different universe. Roll a historical figure in an absurd corporate role — Julius Caesar as Hostile Takeover Specialist, Marie Curie as Lab Safety's Most Wanted, Napoleon as Regional Manager (France & Surrounding Areas).
+
+Pass `variant: "legends"` to `roll_identity` to use it. Default is `"wow"`.
 
 ---
 
