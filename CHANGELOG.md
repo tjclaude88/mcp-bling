@@ -28,7 +28,7 @@ Metadata-only release to list `bling-bag` on the official MCP Registry
 
 ### Added
 
-- `mcpName` field in `package.json` (`io.github.tjclaude88/bling-bag`) — required
+- `mcpName` field in `package.json` (`io.github.<github-user>/bling-bag`) — required
   by the MCP Registry for namespace ownership verification against the npm package
 
 ## [0.1.0] — 2026-04-19

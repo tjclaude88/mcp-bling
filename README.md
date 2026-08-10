@@ -7,7 +7,7 @@ Your bot has a name. Now give it a personality, a look, and a backstory.
 Roll the wheel and see what you get — or write your own in a `bling.json` file.
 
 [![npm version](https://img.shields.io/npm/v/bling-bag)](https://www.npmjs.com/package/bling-bag)
-[![Glama](https://glama.ai/mcp/servers/tjclaude88/mcp-bling/badge)](https://glama.ai/mcp/servers/tjclaude88/mcp-bling)
+[![Glama](https://glama.ai/mcp/servers/<github-user>/mcp-bling/badge)](https://glama.ai/mcp/servers/<github-user>/mcp-bling)
 
 ---
 
@@ -45,7 +45,7 @@ Or run it on-demand without installing — MCP clients can launch it directly vi
 #### For development (modifying the source)
 
 ```bash
-git clone https://github.com/tjclaude88/mcp-bling.git
+git clone https://github.com/<github-user>/mcp-bling.git
 cd mcp-bling
 npm install
 npm run build

@@ -1447,7 +1447,7 @@ Your bot has a name. Now give it a personality, a look, and a backstory.
 Roll the wheel and see what you get — or write your own in a `bling.json` file.
 
 [![npm version](https://img.shields.io/npm/v/bling-bag)](https://www.npmjs.com/package/bling-bag)
-[![Glama](https://glama.ai/mcp/servers/tjclaude88/mcp-bling/badge)](https://glama.ai/mcp/servers/tjclaude88/mcp-bling)
+[![Glama](https://glama.ai/mcp/servers/<github-user>/mcp-bling/badge)](https://glama.ai/mcp/servers/<github-user>/mcp-bling)
 
 ---
 
@@ -1489,10 +1489,10 @@ git commit -m "docs(readme): rewrite opening — lead with identity, add Legends
 - [ ] **Step 1: Update the repo description**
 
 ```bash
-gh repo edit tjclaude88/mcp-bling --description "Give your bot an identity!"
+gh repo edit <github-user>/mcp-bling --description "Give your bot an identity!"
 ```
 
-Expected output: no error. Verify at `https://github.com/tjclaude88/mcp-bling`.
+Expected output: no error. Verify at `https://github.com/<github-user>/mcp-bling`.
 
 - [ ] **Step 2: Final full test suite run**
 
